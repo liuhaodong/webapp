@@ -1,0 +1,16 @@
+body{
+	background-image: url('../images/soft_background.jpg');
+	width:100%;
+}
+
+.comment_buttons{
+	position: absolute;
+	left: 300px;
+}
+
+.follow_button{
+	position: absolute;
+	left: 0px;
+	top: 50px;
+}
+
