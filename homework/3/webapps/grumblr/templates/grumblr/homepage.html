@@ -60,14 +60,6 @@
 										<p class="lead">Haodong</p>
 									</div>
 									<div class="col-md-8 column">
-										<p>
-											Current posts:
-											<ol>
-												{% for post in posts %}
-												<li> {{post}}
-												{% endfor %}
-											</ol>
-											</p>
 											<form action="/homepage/add_post" method="post" accept-charset="utf-8">
 												<textarea class="form-control" rows=7 placeholder="Write your post here!" name="post"></textarea> 
 												<br>
@@ -77,13 +69,38 @@
 										</div>
 									</div>
 								</div>
+								
+								{% for post in posts %}
+								<div class="well well-lg">
+									<div class="row clearfix">
+										<div class="col-md-4 column">
+											<a href="ign_homepage"><img alt="140x140" src="static/images/haodongl_header.jpeg" class="img-thumbnail"></a>
+											<p class="lead">Haodong</p> 
+										</div>
+										<div class="col-md-8 column">
+											<p>{{post}}</p>
+											<br>
+											<div class="btn-group">
+												<button class="btn btn-default" type="button">Like</button> <button class="btn btn-default" type="button">Unlike</button> <button class="btn btn-default active" type="button"> Comment</button> <button class="btn btn-default" type="button"> Block User</button>
+											</div> <br>
+											<div class="row clearfix">
+												<div class="col-md-12 column">
+													<br>
+													<textarea class="form-control" rows=7 placeholder="Write your comment here!"></textarea> 
+													<button type="button" class="btn btn-primary">Comment</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								{% endfor %}
+
 								<div class="well well-lg">
 									<div class="row clearfix">
 										<div class="col-md-4 column">
 											<a href="ign_homepage"><img alt="140x140" src="/static/images/ign_header.jpg" class="img-thumbnail"></a>
 											<p class="lead">IGN</p> 
 										</div>
-
 										<div class="col-md-8 column">
 											<p> Here are 5 things you need to know to read Marvel's The Death of Wolverine.</p>
 											<a href="http://www.ign.com/articles/2014/09/03/5-things-you-need-to-know-to-read-the-death-of-wolverine?utm_campaign=fbposts&utm_source=facebook"><img src="/static/images/Wolverine.jpg" class="img-responsive img-rounded"></a><br>
