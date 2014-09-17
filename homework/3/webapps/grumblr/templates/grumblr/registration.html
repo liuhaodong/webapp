@@ -18,11 +18,17 @@
 	</form>
 
 	<div class="container" style="position:absolute;width:100%;top:20%;left:0%;">
-		<form class="form-signin">
+		<form class="form-signin" method="post" action="/registration">
 			<h1 class="form-signin-heading text-muted">Grumblr</h1>
-			<input type="text" class="form-control email" placeholder="Email address" required="" autofocus="">
-			<input type="password" class="form-control password" placeholder="Password" required="">
-			<input type="text" class="form-control username" placeholder="User Name" required="" autofocus="">
+			{% for error in errors %}
+			<p style="color: red">
+				{{ error }}
+			</p>
+			{% endfor %}
+			{% csrf_token %}
+			<input type="text" class="form-control email" placeholder="Email address" required="" autofocus="" name="email">
+			<input type="password" class="form-control password" placeholder="Password" required="" name="password">
+			<input type="text" class="form-control username" placeholder="User Name" required="" autofocus="" value="{{username}}" name="username">
 			<button class="btn btn-lg btn-primary btn-block" type="submit">
 				Sign Up
 			</button>
@@ -30,7 +36,7 @@
 	</div>
 
 	<div class="container" style="position:absolute;bottom:50px; width:100%">
-	<a class="btn btn-primary btn-lg" href="login">Sign In</a>
+		<a class="btn btn-primary btn-lg" href="login">Sign In</a>
 		<span class="pull-right"><a href="#">Terms</a> | <a href="#">Privacy</a></span>
 	</div>
 	

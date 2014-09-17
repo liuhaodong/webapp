@@ -55,7 +55,7 @@ ROOT_URLCONF = 'webapps.urls'
 LOGIN_URL = '/login'
 
 # Default URL to redirect to after a user logs in.
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/homepage'
 
 
 
