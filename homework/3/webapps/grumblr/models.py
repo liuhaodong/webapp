@@ -1,3 +1,10 @@
 from django.db import models
 
-# Create your models here.
+# User class for built-in authentication module
+from django.contrib.auth.models import User
+
+class Post(models.Model):
+    text = models.CharField(max_length=256)
+    user = models.ForeignKey(User)
+    def __unicode__(self):
+        return self.text

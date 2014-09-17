@@ -43,7 +43,7 @@
 								<a href="profile">My Profile</a>
 							</li>
 							<li>
-								<a href="registration"><i class="glyphicon glyphicon glyphicon-off"></i></a>
+								<a href="/logout"><i class="glyphicon glyphicon glyphicon-off"></i></a>
 							</li>
 						</ul>
 
@@ -60,95 +60,106 @@
 										<p class="lead">Haodong</p>
 									</div>
 									<div class="col-md-8 column">
-										<textarea class="form-control" rows=7 placeholder="Write your post here!"></textarea> 					
-										<br>
-										<button type="button" class="btn btn-primary">Post</button>
-									</div>
-								</div>
-							</div>
-							<div class="well well-lg">
-								<div class="row clearfix">
-									<div class="col-md-4 column">
-										<a href="ign_homepage"><img alt="140x140" src="/static/images/ign_header.jpg" class="img-thumbnail"></a>
-										<p class="lead">IGN</p> 
-									</div>
-
-									<div class="col-md-8 column">
-										<p> Here are 5 things you need to know to read Marvel's The Death of Wolverine.</p>
-										<a href="http://www.ign.com/articles/2014/09/03/5-things-you-need-to-know-to-read-the-death-of-wolverine?utm_campaign=fbposts&utm_source=facebook"><img src="/static/images/Wolverine.jpg" class="img-responsive img-rounded"></a><br>
-										<div class="btn-group">
-											<button class="btn btn-default" type="button">Like</button> <button class="btn btn-default" type="button">Unlike</button> <button class="btn btn-default active" type="button"> Comment</button> <button class="btn btn-default" type="button"> Block User</button>
-										</div> <br>
-										<div class="row clearfix">
-											<div class="col-md-12 column">
-												<br>
-												<textarea class="form-control" rows=7 placeholder="Write your comment here!"></textarea> 
-												<button type="button" class="btn btn-primary">Comment</button>
-											</div>
-										</div>
-									</div>
-
-								</div>
-							</div>
-							<div class="well well-lg">
-								<div class="row clearfix">
-									<div class="col-md-4 column">
-										<a href="https://twitter.com/linkinpark"><img alt="140x140" src="static/images/linkin_park_header.jpg" class="img-thumbnail"></a>
-										<p class="lead">Linkin Park</p>
-									</div>
-									<div class="col-md-8 column">
 										<p>
-											Watch us perform on the #FandomAwards July 27 8/7c on MTV.
-										</p>
-										<img src="static/images/linkin_park_perform.jpg" class="img-responsive img-rounded"><br>
-										<div class="btn-group">
-											<button class="btn btn-default" type="button">Like</button> <button class="btn btn-default" type="button">Unlike</button> <button class="btn btn-default" type="button"> Comment</button> <button class="btn btn-default" type="button"> Block User</button>
+											Current posts:
+											<ol>
+												{% for post in posts %}
+												<li> {{post}}
+												{% endfor %}
+											</ol>
+											</p>
+											<form action="/homepage/add_post" method="post" accept-charset="utf-8">
+												<textarea class="form-control" rows=7 placeholder="Write your post here!" name="post"></textarea> 
+												<br>
+												<button type="submit" class="btn btn-primary">Post</button>
+												{% csrf_token %}
+											</form>
 										</div>
-										<div class="well">
+									</div>
+								</div>
+								<div class="well well-lg">
+									<div class="row clearfix">
+										<div class="col-md-4 column">
+											<a href="ign_homepage"><img alt="140x140" src="/static/images/ign_header.jpg" class="img-thumbnail"></a>
+											<p class="lead">IGN</p> 
+										</div>
+
+										<div class="col-md-8 column">
+											<p> Here are 5 things you need to know to read Marvel's The Death of Wolverine.</p>
+											<a href="http://www.ign.com/articles/2014/09/03/5-things-you-need-to-know-to-read-the-death-of-wolverine?utm_campaign=fbposts&utm_source=facebook"><img src="/static/images/Wolverine.jpg" class="img-responsive img-rounded"></a><br>
+											<div class="btn-group">
+												<button class="btn btn-default" type="button">Like</button> <button class="btn btn-default" type="button">Unlike</button> <button class="btn btn-default active" type="button"> Comment</button> <button class="btn btn-default" type="button"> Block User</button>
+											</div> <br>
 											<div class="row clearfix">
-												<div class="col-md-4 column">
-													<img alt="30x30" src="static/images/user2_header.jpeg" class="img-thumbnail">
-													<p>LinkinParkFan_1</p>
-												</div>
-												<div class="col-md-8 column">
-													<p>i love linkin park my favorit band!</p>
+												<div class="col-md-12 column">
+													<br>
+													<textarea class="form-control" rows=7 placeholder="Write your comment here!"></textarea> 
+													<button type="button" class="btn btn-primary">Comment</button>
 												</div>
 											</div>
 										</div>
-										<div class="well">
-											<div class="row clearfix">
-												<div class="col-md-4 column">
-													<img alt="30x30" src="static/images/user1_header.jpeg" class="img-thumbnail">
-													<p>LinkinParkFan_2</p>
+
+									</div>
+								</div>
+								<div class="well well-lg">
+									<div class="row clearfix">
+										<div class="col-md-4 column">
+											<a href="https://twitter.com/linkinpark"><img alt="140x140" src="static/images/linkin_park_header.jpg" class="img-thumbnail"></a>
+											<p class="lead">Linkin Park</p>
+										</div>
+										<div class="col-md-8 column">
+											<p>
+												Watch us perform on the #FandomAwards July 27 8/7c on MTV.
+											</p>
+											<img src="static/images/linkin_park_perform.jpg" class="img-responsive img-rounded"><br>
+											<div class="btn-group">
+												<button class="btn btn-default" type="button">Like</button> <button class="btn btn-default" type="button">Unlike</button> <button class="btn btn-default" type="button"> Comment</button> <button class="btn btn-default" type="button"> Block User</button>
+											</div>
+											<div class="well">
+												<div class="row clearfix">
+													<div class="col-md-4 column">
+														<img alt="30x30" src="static/images/user2_header.jpeg" class="img-thumbnail">
+														<p>LinkinParkFan_1</p>
+													</div>
+													<div class="col-md-8 column">
+														<p>i love linkin park my favorit band!</p>
+													</div>
 												</div>
-												<div class="col-md-8 column">
-													<p>I am so pumped to FINALLY see them tonight! ! I already know in advance they are going to be AMAZING!!!!</p>
+											</div>
+											<div class="well">
+												<div class="row clearfix">
+													<div class="col-md-4 column">
+														<img alt="30x30" src="static/images/user1_header.jpeg" class="img-thumbnail">
+														<p>LinkinParkFan_2</p>
+													</div>
+													<div class="col-md-8 column">
+														<p>I am so pumped to FINALLY see them tonight! ! I already know in advance they are going to be AMAZING!!!!</p>
+													</div>
 												</div>
 											</div>
 										</div>
 									</div>
 								</div>
 							</div>
+
 						</div>
-						
-					</div>
-					<div class="col-md-0 column">
-					</div>
-					<div class="col-md-3 column">
-						<div class="well well-lg">
-							<h3>
-								Recommendations
-							</h3>
-							<a href="https://twitter.com/Xbox"><img alt="140x140" src="static/images/xbox_header.png" class="img-thumbnail"> </a><p class="lead">Xbox</p><button type="button" class="btn btn-primary">Follow</button>
-							<br><br>
-							<a href="https://twitter.com/NASA"><img alt="140x140" src="static/images/nasa_header.jpg" class="img-thumbnail"> </a><p class="lead">NASA</p><button type="button" class="btn btn-primary">Follow</button>
-							<br><br>
-							<a href="https://twitter.com/BBCBreaking"><img alt="140x140" src="static/images/bbc_header.png" class="img-thumbnail"></a> <p class="lead">BBC Breaking News</p><button type="button" class="btn btn-primary">Follow</button>
+						<div class="col-md-0 column">
+						</div>
+						<div class="col-md-3 column">
+							<div class="well well-lg">
+								<h3>
+									Recommendations
+								</h3>
+								<a href="https://twitter.com/Xbox"><img alt="140x140" src="static/images/xbox_header.png" class="img-thumbnail"> </a><p class="lead">Xbox</p><button type="button" class="btn btn-primary">Follow</button>
+								<br><br>
+								<a href="https://twitter.com/NASA"><img alt="140x140" src="static/images/nasa_header.jpg" class="img-thumbnail"> </a><p class="lead">NASA</p><button type="button" class="btn btn-primary">Follow</button>
+								<br><br>
+								<a href="https://twitter.com/BBCBreaking"><img alt="140x140" src="static/images/bbc_header.png" class="img-thumbnail"></a> <p class="lead">BBC Breaking News</p><button type="button" class="btn btn-primary">Follow</button>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-</body>
-</html>
+	</body>
+	</html>

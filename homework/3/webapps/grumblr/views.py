@@ -8,10 +8,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 
+from grumblr.models import *
+
 
 @login_required
 def homepage(request):
-    return render(request, 'grumblr/homepage.html', {})
+    posts = Post.objects.filter(user=request.user) 
+    return render(request, 'grumblr/homepage.html', {'posts' : posts})
 
 
 def registration(request):
@@ -48,4 +51,17 @@ def registration(request):
     new_user = authenticate(username=request.POST['username'], \
                             password=request.POST['password'])
     login(request, new_user)
+    return redirect('/homepage')
+
+
+def add_post(request):
+    errors = []
+    if not 'post' in request.POST or not request.POST['post']:
+        errors.append('Post content cant be empty')
+    else:
+        new_post = Post(text=request.POST['post'], user=request.user)
+        new_post.save()
+
+    posts = Post.objects.filter(user=request.user)
+    context = {'posts' : posts, 'errors' : errors}
     return redirect('/homepage')
