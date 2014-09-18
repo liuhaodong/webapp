@@ -130,14 +130,22 @@ def edit_profile(request):
         else:
             pass
         user_profile = Profile.objects.get(user = request.user)
-        user_profile.email = request.POST['email']
-        user_profile.motto = request.POST['motto']
-        user_profile.age = request.POST['age']
-        user_profile.fullname = request.POST['fullname']
-        user_profile.company = request.POST['company']
-        user_profile.address = request.POST['address']
-        user_profile.phone = request.POST['phone']
-        user_profile.language = request.POST['language']
+        if 'email' in request.POST and request.POST['email']:
+            user_profile.email = request.POST['email']
+        if 'motto' in request.POST and request.POST['motto']:
+            user_profile.motto = request.POST['motto']
+        if 'age' in request.POST and request.POST['age']:
+            user_profile.age = request.POST['age']
+        if 'fullname' in request.POST and request.POST['fullname']:
+            user_profile.fullname = request.POST['fullname']
+        if 'company' in request.POST and request.POST['company']:
+            user_profile.company = request.POST['company']
+        if 'address' in request.POST and request.POST['address']:
+            user_profile.address = request.POST['address']
+        if 'phone' in request.POST and request.POST['phone']:
+            user_profile.phone = request.POST['phone']
+        if 'language' in request.POST and request.POST['language']:
+            user_profile.language = request.POST['language']
         user_profile.save()
         context = {'profile' : user_profile}
     return render(request,'grumblr/profile.html',context)
