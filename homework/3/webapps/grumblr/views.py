@@ -88,6 +88,14 @@ def delete_post(request, id):
     return redirect('/homepage')
 
 
+def search_post(request):
+    context={}
+    keyword = request.POST.get('keyword',False)
+    print(keyword)
+    posts = Post.objects.filter(Q(subject__icontains=keyword) | Q(text__icontains=keyword))
+    context = {'posts' : posts}
+    return render(request, 'grumblr/search_result.html',context)
+
 @login_required
 def profile(request):
     return render(request,'grumblr/profile.html',{})

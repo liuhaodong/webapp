@@ -8,6 +8,8 @@ urlpatterns = patterns('',
     url(r'^login$', 'django.contrib.auth.views.login', {'template_name':'grumblr/login.html'}),
     url(r'^profile$', 'grumblr.views.profile'),
     url(r'^edit_profile$','grumblr.views.edit_profile'),
+    url(r'^search_post$','grumblr.views.search_post'),
+    url(r'^search_result$','grumblr.views.search_post'),
     url(r'^logout$', 'django.contrib.auth.views.logout_then_login'),
     url(r'^registration$', 'grumblr.views.registration'),
 )
