@@ -5,6 +5,15 @@ from django.contrib.auth.models import User
 
 class Post(models.Model):
     text = models.CharField(max_length=256)
+    subject = models.CharField(max_length=256)
     user = models.ForeignKey(User)
+    def __unicode__(self):
+        return self.text
+
+class Profile(models.Model):
+    email = models.CharField(max_length=256)
+    age   = models.IntegerField()
+    user  = models.ForeignKey(User)
+    moto  = models.CharField(max_length=256)
     def __unicode__(self):
         return self.text

@@ -49,33 +49,17 @@
 				<div class="row clearfix">
 					<div class="col-md-9 column">
 						<div class="well well-lg">
-							<div class="well well-lg">
-								<div class="row clearfix">
-									<div class="col-md-4 column">
-										<img alt="140x140" src="static/images/default_header.png" class="img-thumbnail">
-										<p class="lead">{{ user.get_username }}</p>
-									</div>
-									<div class="col-md-8 column">
-										<form action="/homepage/add_post" method="post" accept-charset="utf-8">
-											<textarea class="form-control" rows=1 placeholder="Subject" name="subject"></textarea><br>
-											<textarea class="form-control" rows=7 placeholder="Write your post here!" name="post"></textarea> 
-											<br>
-											<button type="submit" class="btn btn-primary">Post</button>
-											{% csrf_token %}
-										</form>
-									</div>
-								</div>
-							</div>
+							
 
 							{% for post in posts %}
 							<div class="well well-lg">
 								<div class="row clearfix">
 									<div class="col-md-4 column">
 										<a href="ign_homepage"><img alt="140x140" src="static/images/default_header.png" class="img-thumbnail"></a>
-										<p class="lead">{{ user.get_username }}</p> 
+										<p class="lead">{{ post.user.get_username }}</p> 
 									</div>
 									<div class="col-md-8 column">
-										<h2 class="media-heading">{{post.subject}} <a href="/homepage/delete_post/{{post.id}}"><i class="glyphicon glyphicon glyphicon-remove"></i></a></h2><br>
+										<h2 class="media-heading">{{post.subject}} </h2><br>
 										<pre class="media-body">{{post.text}}</pre>
 										<br>
 										<div class="btn-group">
