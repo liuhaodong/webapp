@@ -91,3 +91,22 @@ def delete_post(request, id):
 @login_required
 def profile(request):
     return render(request,'grumblr/profile.html',{})
+
+
+@login_required
+def edit_profile(request):
+    context = {}
+    if request.method == 'GET':
+        return render(request,'grumblr/edit_profile.html',{})
+    else:
+        user_profile = Profile.objects.filter(user = request.user)
+        user_profile.email = request.POST['email']
+        user_profile.motto = request.POST['motto']
+        user_profile.age = request.POST['age']
+        user_profile.fullname = request.POST['fullname']
+        user_profile.company = request.POST['company']
+        user_profile.address = request.POST['address']
+        user_profile.phone = request.POST['phone']
+        user_profile.language = request.POST['language']
+        context = {'profile' : user_profile}
+    return render(request,'grumblr/profile.html',context)

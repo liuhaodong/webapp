@@ -12,8 +12,13 @@ class Post(models.Model):
 
 class Profile(models.Model):
     email = models.CharField(max_length=256)
-    age   = models.IntegerField()
+    age   = models.CharField(max_length=3)
     user  = models.ForeignKey(User)
-    moto  = models.CharField(max_length=256)
+    motto  = models.CharField(max_length=256)
+    fullname = models.CharField(max_length=128)
+    company = models.CharField(max_length=128)
+    address = models.CharField(max_length=256)
+    phone  = models.CharField(max_length=128)
+    language = models.CharField(max_length=128)
     def __unicode__(self):
         return self.text
