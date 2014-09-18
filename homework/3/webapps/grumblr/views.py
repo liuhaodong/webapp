@@ -23,6 +23,13 @@ def user_stream(request):
     posts = Post.objects.filter(~Q(user=request.user))
     return render(request, 'grumblr/user_stream.html', {'posts' : posts})
 
+@login_required
+def specified_user_stream(request, id):
+    tmp_user = User.objects.get(id=id)
+    posts = Post.objects.filter(Q(user=tmp_user))
+    return render(request, 'grumblr/user_stream.html', {'posts' : posts})
+
+
 def registration(request):
     context = {}
 
@@ -98,16 +105,31 @@ def search_post(request):
 
 @login_required
 def profile(request):
-    return render(request,'grumblr/profile.html',{})
+    context={}
+    tmp_profile_set = Profile.objects.filter(user = request.user)
+    if tmp_profile_set.count() == 0:
+        new_profile = Profile(user=request.user)
+        new_profile.save()
+    else:
+        pass
+    user_profile = Profile.objects.get(user = request.user)
+    context = {'profile' : user_profile}
+    return render(request,'grumblr/profile.html',context)
 
 
 @login_required
 def edit_profile(request):
     context = {}
     if request.method == 'GET':
-        return render(request,'grumblr/edit_profile.html',{})
+        return render(request,'grumblr/edit_profile.html',context)
     else:
-        user_profile = Profile.objects.filter(user = request.user)
+        tmp_profile_set = Profile.objects.filter(user = request.user)
+        if tmp_profile_set.count() == 0 :
+            new_profile = Profile(user=request.user)
+            new_profile.save()
+        else:
+            pass
+        user_profile = Profile.objects.get(user = request.user)
         user_profile.email = request.POST['email']
         user_profile.motto = request.POST['motto']
         user_profile.age = request.POST['age']
@@ -116,5 +138,6 @@ def edit_profile(request):
         user_profile.address = request.POST['address']
         user_profile.phone = request.POST['phone']
         user_profile.language = request.POST['language']
+        user_profile.save()
         context = {'profile' : user_profile}
     return render(request,'grumblr/profile.html',context)
