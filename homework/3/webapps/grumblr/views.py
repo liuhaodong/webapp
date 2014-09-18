@@ -53,7 +53,7 @@ def registration(request):
     login(request, new_user)
     return redirect('/homepage')
 
-
+@login_required
 def add_post(request):
     errors = []
     if not 'post' in request.POST or not request.POST['post']:
@@ -61,6 +61,21 @@ def add_post(request):
     else:
         new_post = Post(text=request.POST['post'], user=request.user)
         new_post.save()
+
+    posts = Post.objects.filter(user=request.user)
+    context = {'posts' : posts, 'errors' : errors}
+    return redirect('/homepage')
+
+
+@login_required
+def delete_post(request, id):
+    errors = []
+
+    try:
+        post_to_delete = Post.objects.get(id=id, user=request.user)
+        post_to_delete.delete()
+    except ObjectDoesNotExist:
+        errors.append('The post did not exist in your todo list.')
 
     posts = Post.objects.filter(user=request.user)
     context = {'posts' : posts, 'errors' : errors}
