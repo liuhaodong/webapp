@@ -1,8 +1,12 @@
 from django.shortcuts import render
 from django.db import transaction
-
+from django.core import serializers
 from models import *
 from forms import *
+
+import json
+
+from django.http import HttpResponse
 
 def make_view(request, 
               messages=[], 
@@ -60,4 +64,6 @@ def register_student(request):
 
 # Complete this action to generate a JSON response containing all courses
 def get_all_courses(request):
-    return None  
+    courses = Course.objects.all()
+    data = serializers.serialize('json', courses)
+    return HttpResponse(data, content_type="application/json")
