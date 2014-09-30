@@ -13,4 +13,5 @@ urlpatterns = patterns('',
     url(r'^search_result$','grumblr.views.search_post'),
     url(r'^logout$', 'django.contrib.auth.views.logout_then_login'),
     url(r'^registration$', 'grumblr.views.registration'),
+    url(r'^homepage/add_comment$','grumblr.views.add_comment'),
 )

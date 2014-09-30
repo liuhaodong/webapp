@@ -16,7 +16,8 @@ from grumblr.models import *
 @login_required
 def homepage(request):
     posts = Post.objects.filter(user=request.user) 
-    return render(request, 'grumblr/homepage.html', {'posts' : posts})
+    comments = Comment.objects.all()
+    return render(request, 'grumblr/homepage.html', {'posts' : posts, 'comments' : comments})
 
 @login_required
 def user_stream(request):
@@ -81,6 +82,16 @@ def add_post(request):
 
 
 @login_required
+def add_comment(request):
+    errors = []
+    if not 'comment' in request.POST or not request.POST['comment']:
+        errors.append('Comment content cant be empty')
+    else:
+        new_comment = Comment(content=request.POST['comment'], post=Post.objects.get(id = request.POST['post_id']), user=User.objects.get(id = request.POST['user_id']))
+        new_comment.save()
+    return redirect('/homepage')
+
+@login_required
 def delete_post(request, id):
     errors = []
 
@@ -115,6 +126,8 @@ def profile(request):
     user_profile = Profile.objects.get(user = request.user)
     context = {'profile' : user_profile}
     return render(request,'grumblr/profile.html',context)
+
+
 
 
 @login_required
