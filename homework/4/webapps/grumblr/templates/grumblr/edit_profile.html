@@ -49,13 +49,18 @@
 				</nav>
 				<div class="row clearfix">
 					<div class="col-md-9 column">
-						<form action = "edit_profile" method="post">
+						<form enctype="multipart/form-data" action = "edit_profile" method="post">
 							{% csrf_token %}
 							<div class="well well-lg">
 								<div class="well well-lg">
 									<div class="row clearfix">
 										<div class="col-md-3 column">
-											<img alt="140x140" src="static/images/default_header.png" class="img-thumbnail">
+											{% if profile.id_picture %}
+											<img src="picture/{{profile.id}}" alt="140x140" class="img-thumbnail">
+											{% else %}
+											<img alt="140x140" src="static/images/default_header.png" class="img-thumbnail"><br>
+											{% endif %}
+											<input type="file" name="id_picture">
 											<p class="lead">{{ user.get_username }}</p>
 										</div>
 										<div class="col-md-9 column">

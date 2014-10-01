@@ -58,7 +58,11 @@
 							<div class="well well-lg">
 								<div class="row clearfix">
 									<div class="col-md-4 column">
-										<img alt="140x140" src="static/images/default_header.png" class="img-thumbnail">
+										{% if profile.id_picture %}
+										<img src="picture/{{profile.id}}" alt="140x140" class="img-thumbnail">
+										{% else %}
+										<img alt="140x140" src="static/images/default_header.png" class="img-thumbnail"><br>
+										{% endif %}
 										<p class="lead">{{ user.get_username }}</p>
 									</div>
 									<div class="col-md-8 column">
@@ -77,7 +81,13 @@
 							<div class="well well-lg">
 								<div class="row clearfix">
 									<div class="col-md-4 column">
-										<a a href="/user_stream_{{post.user.id}}"><img alt="140x140" src="static/images/default_header.png" class="img-thumbnail"></a>
+										<a a href="/user_stream_{{post.user.id}}">
+											{% if profile.id_picture %}
+											<img src="picture/{{profile.id}}" alt="140x140" class="img-thumbnail">
+											{% else %}
+											<img alt="140x140" src="static/images/default_header.png" class="img-thumbnail"><br>
+											{% endif %}
+										</a>
 										<p class="lead">{{ user.get_username }}</p> 
 									</div>
 									<div class="col-md-8 column">
@@ -99,9 +109,9 @@
 											</form>
 											<br>
 											{% for comment in comments%}
-												{% if comment.post.id == post.id %}
-												<pre class="media-body">{{comment.user}}: {{comment.content}}</pre>
-												{% endif %}
+											{% if comment.post.id == post.id %}
+											<pre class="media-body">{{comment.user}}: {{comment.content}}</pre>
+											{% endif %}
 											{% endfor %}
 										</div>
 										<div class="row clearfix">

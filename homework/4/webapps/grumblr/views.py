@@ -1,4 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
 #Decorator to use built-in authentication system
@@ -9,20 +11,31 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 
 from django.db.models import Q
+from django.http import HttpResponse, Http404
+
+# Helper function to guess a MIME type from a file name
+from mimetypes import guess_type
+
+from itertools import chain
 
 from grumblr.models import *
-
+from grumblr.forms import *
 
 @login_required
 def homepage(request):
     posts = Post.objects.filter(user=request.user) 
     comments = Comment.objects.all()
-    return render(request, 'grumblr/homepage.html', {'posts' : posts, 'comments' : comments})
+    profile = Profile.objects.get(user = request.user)
+    return render(request, 'grumblr/homepage.html', {'posts' : posts, 'comments' : comments, 'profile' : profile})
 
 @login_required
 def user_stream(request):
-    posts = Post.objects.filter(~Q(user=request.user))
-    return render(request, 'grumblr/user_stream.html', {'posts' : posts})
+    follows = Follow.objects.filter(follower = request.user)
+    following_posts = []
+    for follow in follows:
+        tmp_posts = Post.objects.filter(user = follow.following)
+        following_posts = list(chain(following_posts, tmp_posts))
+    return render(request, 'grumblr/user_stream.html', {'posts' : following_posts})
 
 @login_required
 def specified_user_stream(request, id):
@@ -128,7 +141,23 @@ def profile(request):
     return render(request,'grumblr/profile.html',context)
 
 
+@login_required
+def get_picture(request, id):
+    profile = get_object_or_404(Profile, user=request.user, id=id)
+    if not profile.id_picture:
+        raise Http404
 
+    content_type = guess_type(profile.id_picture.name)
+    return HttpResponse(profile.id_picture, content_type=content_type)
+
+@login_required
+def follow(request, id):
+    if id == request.user.id:
+        return
+    tmp_following = User.objects.get(id = id)
+    new_follow = Follow(follower=request.user, following = tmp_following)
+    new_follow.save()
+    return redirect('/homepage');
 
 @login_required
 def edit_profile(request):
@@ -159,6 +188,10 @@ def edit_profile(request):
             user_profile.phone = request.POST['phone']
         if 'language' in request.POST and request.POST['language']:
             user_profile.language = request.POST['language']
-        user_profile.save()
+        if 'id_picture' in request.FILES and request.FILES['id_picture']:
+            print("pic inside")
+            user_profile.id_picture = request.FILES['id_picture']
+        print("after")
+	user_profile.save()
         context = {'profile' : user_profile}
     return render(request,'grumblr/profile.html',context)
