@@ -17,13 +17,14 @@ from django.http import HttpResponse, Http404
 from mimetypes import guess_type
 
 from itertools import chain
+from datetime import datetime
 
 from grumblr.models import *
 from grumblr.forms import *
 
 @login_required
 def homepage(request):
-    posts = Post.objects.filter(user=request.user) 
+    posts = Post.objects.filter(user=request.user).order_by('-date')
     comments = Comment.objects.all()
     tmp_profile_set = Profile.objects.filter(user = request.user)
     if tmp_profile_set.count() == 0:
@@ -31,6 +32,17 @@ def homepage(request):
     else:
         pass
     profile = Profile.objects.get(user = request.user)
+    post_contents = []
+    for post in posts:
+        content = {}
+        content['dislike'] = False
+        if DislikeGrumbl.objects.filter(user=request.user, post=post).count()>0:
+            content['dislike'] = True
+        content['profile'] = Profile.objects.get(user = post.user)
+        content['post'] = post
+        content['comments'] = Comment.objects.filter(post = post)
+        post_contents.append(content)
+
     recommends = []
     recommend_users = get_recommend_users(request)
     for user in recommend_users:
@@ -38,7 +50,7 @@ def homepage(request):
         recommend['recommend_user'] = user
         recommend['recommend_profile'] = Profile.objects.get(user = user)
         recommends.append(recommend)
-    return render(request, 'grumblr/homepage.html', {'posts' : posts, 'comments' : comments, 'profile' : profile, 'recommends' : recommends})
+    return render(request, 'grumblr/homepage.html', {'post_contents' : post_contents, 'profile' : profile, 'recommends' : recommends})
 
 @login_required
 def get_recommend_users(request):
@@ -56,17 +68,16 @@ def user_stream(request):
     follows = Follow.objects.filter(follower = request.user)
     following_posts = []
     for follow in follows:
-        tmp_posts = Post.objects.filter(user = follow.following)
+        tmp_posts = Post.objects.filter(user = follow.following).order_by('-date')
         following_posts = list(chain(following_posts, tmp_posts))
     following_contents = []
     for post in following_posts:
+        if BlockUser.objects.filter(blocked_user=request.user, blocking_user=post.user).count():
+            continue
         content = {}
         content['dislike'] = False
         if DislikeGrumbl.objects.filter(user=request.user, post=post).count()>0:
             content['dislike'] = True
-            print(request.user)
-            print(post.id)
-            print(DislikeGrumbl.objects.filter(user=request.user, post=post).count)
         content['profile'] = Profile.objects.get(user = post.user)
         content['post'] = post
         content['comments'] = Comment.objects.filter(post = post)
@@ -86,7 +97,12 @@ def specified_user_stream(request, id):
     posts = Post.objects.filter(Q(user=tmp_user))
     following_contents = []
     for post in posts:
+        if BlockUser.objects.filter(blocked_user=request.user, blocking_user=post.user).count():
+            continue
         content = {}
+        content['dislike'] = False
+        if DislikeGrumbl.objects.filter(user=request.user, post=post).count()>0:
+            content['dislike'] = True
         content['profile'] = Profile.objects.get(user = post.user)
         content['post'] = post
         content['comments'] = Comment.objects.filter(post = post)
@@ -98,7 +114,11 @@ def specified_user_stream(request, id):
         recommend['recommend_user'] = user
         recommend['recommend_profile'] = Profile.objects.get(user = user)
         recommends.append(recommend)
-    return render(request, 'grumblr/user_stream.html', {'following_contents' : following_contents, 'recommends': recommends})
+    specified_user = {}
+    specified_user['user'] = tmp_user
+    specified_user['following'] = (Follow.objects.filter(follower=request.user, following=tmp_user).count() > 0)
+    specified_user['blocking'] = (BlockUser.objects.filter(blocking_user=request.user, blocked_user=tmp_user).count() > 0)
+    return render(request, 'grumblr/user_stream.html', {'following_contents' : following_contents, 'recommends': recommends, 'specified_user': specified_user})
 
 def registration(request):
     context = {}
@@ -156,22 +176,54 @@ def add_comment(request):
     if not 'comment' in request.POST or not request.POST['comment']:
         errors.append('Comment content cant be empty')
     else:
-        new_comment = Comment(content=request.POST['comment'], post=Post.objects.get(id = request.POST['post_id']), user=User.objects.get(id = request.POST['user_id']))
+        new_comment = Comment(content=request.POST['comment'], post=Post.objects.get(id = request.POST['post_id']), user=request.user)
         new_comment.save()
     return HttpResponseRedirect('/homepage')
 
 @login_required
+def delete_comment(request, id):
+    errors = []
+    try:
+        comment_to_delete = Comment.objects.get(id=id, user=request.user)
+        comment_to_delete.delete()
+    except ObjectDoesNotExist:
+        errors.append('The post did not exist in your todo list.')
+    return redirect('/homepage')
+
+@login_required
 def delete_post(request, id):
     errors = []
-
     try:
         post_to_delete = Post.objects.get(id=id, user=request.user)
         post_to_delete.delete()
     except ObjectDoesNotExist:
-        errors.append('The post did not exist in your todo list.')
+        errors.append('The post did not exist.')
 
     posts = Post.objects.filter(user=request.user)
     context = {'posts' : posts, 'errors' : errors}
+    return redirect('/homepage')
+
+@login_required
+def block_user(request, id):
+    errors = []
+    if id == request.user.id:
+        return
+    try:
+        tmp_blocked = User.objects.get(id = id)
+        new_block = BlockUser(blocking_user=request.user, blocked_user = tmp_blocked)
+    except ObjectDoesNotExist:
+        errors.append('Block User Does Not Exist')
+    new_block.save()
+    return redirect('/user_stream_'+str(id))
+
+@login_required
+def unblock_user(request, id):
+    errors = []
+    try:
+        block_to_delete = BlockUser.objects.get(blocked_user=User.objects.get(id=id), blocking_user=request.user)
+        block_to_delete.delete()
+    except ObjectDoesNotExist:
+        errors.append('The block did not exist')
     return redirect('/homepage')
 
 @login_required
@@ -220,13 +272,13 @@ def follow(request, id):
     tmp_following = User.objects.get(id = id)
     new_follow = Follow(follower=request.user, following = tmp_following)
     new_follow.save()
-    return redirect('/homepage');
+    return redirect('/user_stream_'+str(id))
 
 @login_required
 def unfollow(request, id):
    follow_to_delete = get_object_or_404(Follow, follower=request.user, following=User.objects.get(id=id)) 
    follow_to_delete.delete()
-   return redirect('/user_stream')
+   return redirect('/user_stream_'+str(id))
 
 @login_required
 def edit_profile(request):

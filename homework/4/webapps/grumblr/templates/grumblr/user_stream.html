@@ -71,8 +71,8 @@
 
 										<h2 class="media-heading">{{following_content.post.subject}} </h2>
 										{% if following_content.dislike %}
-									    <i class="glyphicon glyphicon-thumbs-down"></i><i>You Disliked This Post</i>
-									    {% endif %}
+										<i class="glyphicon glyphicon-thumbs-down"></i><i>You Disliked This Post</i>
+										{% endif %}
 										<br>
 										<pre class="media-body">{{following_content.post.text}}</pre>
 										<br>
@@ -90,9 +90,11 @@
 												{% csrf_token %}
 											</form>
 											<br>
+											<div class="well">
 											{% for comment in following_content.comments%}
-											<pre class="media-body">{{comment.user}}: {{comment.content}}</pre>
+											<pre class="media-body">{{comment.user}}: {{comment.content}} {% if comment.user = user %} <a href="{% url 'delete_comment' comment.id %}"><i class="glyphicon glyphicon glyphicon-remove"></i></a>{% endif%}</pre>
 											{% endfor %}
+											</div>
 										</div>
 										<div class="row clearfix">
 											<div class="col-md-12 column">
@@ -111,7 +113,17 @@
 					</div>
 					<div class="col-md-3 column">
 						<div class="well well-lg">
-							<p class="lead">Login As: {{user.get_username}}</p>
+							<p class="">Login As: {{user.get_username}}</p>
+							{% if specified_user %}
+							<div class="well">
+								<p class="lead">{{specified_user.user}}'s Home</p>
+								<div class="btn-group">
+								{% if specified_user.following %}<a href="{% url 'unfollow' specified_user.user.id %}"><button class="btn btn-primary" type="button">Unfollow</button></a>{% else %}<a href="{% url 'follow' specified_user.user.id %}"><button class="btn btn-primary" type="button">Follow</button></a>{% endif %}
+
+								{% if specified_user.blocking %}<a href="{% url 'unblock_user' specified_user.user.id %}"><button class="btn btn-primary" type="button">Unblock</button></a>{% else %}<a href="{% url 'block_user' specified_user.user.id %}"><button class="btn btn-primary" type="button">Block</button></a>{% endif %}
+								</div>
+							</div>
+							{% endif %}
 							<h3>
 								Recommendations
 							</h3>

@@ -18,4 +18,7 @@ urlpatterns = patterns('',
     url(r'^follow/(?P<id>\d+)$','grumblr.views.follow', name='follow'),
     url(r'^unfollow/(?P<id>\d+)$','grumblr.views.unfollow', name='unfollow'),
     url(r'^dislike/(?P<id>\d+)$','grumblr.views.dislike_post', name='dislike'),
+    url(r'^delete_comment/(?P<id>\d+)$','grumblr.views.delete_comment', name='delete_comment'),
+    url(r'^block_user/(?P<id>\d+)$', 'grumblr.views.block_user', name='block_user'),
+    url(r'^unblock_user/(?P<id>\d+)$', 'grumblr.views.unblock_user', name='unblock_user'),
 )

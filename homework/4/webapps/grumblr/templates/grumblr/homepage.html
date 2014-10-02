@@ -76,41 +76,44 @@
 								</div>
 							</div>
 
-							{% for post in posts %}
+							{% for content in post_contents %}
 							<div class="well well-lg">
 								<div class="row clearfix">
 									<div class="col-md-4 column">
-										<a a href="/user_stream_{{post.user.id}}">
+										<a a href="/user_stream_{{content.post.user.id}}">
 											{% if profile.id_picture %}
-											<img src="picture/{{profile.id}}" alt="140x140" class="img-thumbnail">
+											<img src="picture/{{content.profile.id}}" alt="140x140" class="img-thumbnail">
 											{% else %}
 											<img alt="140x140" src="static/images/default_header.png" class="img-thumbnail"><br>
 											{% endif %}
 										</a>
-										<p class="lead">{{ user.get_username }}</p> 
+										<p class="lead">{{ content.post.user.get_username }}</p> 
 									</div>
 									<div class="col-md-8 column">
-										<h2 class="media-heading">{{post.subject}} <a href="/homepage/delete_post/{{post.id}}"><i class="glyphicon glyphicon glyphicon-remove"></i></a></h2><br>
-										<pre class="media-body">{{post.text}}</pre>
+										<h2 class="media-heading">{{content.post.subject}} <a href="/homepage/delete_post/{{content.post.id}}"><i class="glyphicon glyphicon glyphicon-remove"></i></a></h2>
+										<p>{{content.post.date}}</p>
+										{% if content.dislike %}
+									    <i class="glyphicon glyphicon-thumbs-down"></i><i>You Disliked This Post</i>
+									    {% endif %}
+										<br>
+										<pre class="media-body">{{content.post.text}}</pre>
 										<br>
 										<div class="btn-group">
-											<button class="btn btn-default" type="button">Like</button> <button class="btn btn-default" type="button">Unlike</button> <button class="btn btn-default" data-toggle="collapse" data-target="#comment" type="button"> Comment</button> <button class="btn btn-default" type="button"> Block User</button>
+											<button class="btn btn-default" type="button">Like</button> <a href="dislike/{{content.post.id}}"><button class="btn btn-default" type="button">Dislike</button></a> <button class="btn btn-default" data-toggle="collapse" data-target="#comment{{content.post.id}}" type="button"> Comment</button> <button class="btn btn-default" type="button"> Block User</button>
 										</div> <br>
 
-										<div id="comment" class="collapse in">
+										<div id="comment{{content.post.id}}" class="collapse in">
 											<form action="/homepage/add_comment" method="post" accept-charset="utf-8">
 												<br>
 												<textarea class="form-control" rows=7 placeholder="Write your comment here!" name="comment"></textarea><br>
 												<button type="submit" class="btn btn-primary">Comment</button>
-												<input type="hidden" name="post_id"  value={{post.id}} >
+												<input type="hidden" name="post_id"  value={{content.post.id}} >
 												<input type="hidden" name="user_id"  value={{user.id}} >
 												{% csrf_token %}
 											</form>
 											<br>
-											{% for comment in comments%}
-											{% if comment.post.id == post.id %}
-											<pre class="media-body">{{comment.user}}: {{comment.content}}</pre>
-											{% endif %}
+											{% for comment in content.comments %}
+											<pre class="media-body">{{comment.user}}: {{comment.content}} {% if comment.user = user %} <a href="{% url 'delete_comment' comment.id %}"><i class="glyphicon glyphicon glyphicon-remove"></i></a>{% endif%}</pre>
 											{% endfor %}
 										</div>
 										<div class="row clearfix">

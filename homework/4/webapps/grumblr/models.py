@@ -1,5 +1,5 @@
 from django.db import models
-
+from datetime import datetime
 # User class for built-in authentication module
 from django.contrib.auth.models import User
 
@@ -7,6 +7,7 @@ class Post(models.Model):
     text = models.CharField(max_length=256)
     subject = models.CharField(max_length=256)
     user = models.ForeignKey(User)
+    date = models.DateTimeField(default=datetime.now)
     def __unicode__(self):
         return self.text
 
@@ -28,6 +29,7 @@ class Comment(models.Model):
     content = models.CharField(max_length=256)
     user    = models.ForeignKey(User)
     post    = models.ForeignKey(Post)
+    date = models.DateTimeField(default=datetime.now)
     def __unicode__(self):
         return self.content
 
