@@ -36,3 +36,4 @@ class Follow(models.Model):
     following = models.ForeignKey(User, related_name="following")
     def __unicode__(self):
         return self.text
+

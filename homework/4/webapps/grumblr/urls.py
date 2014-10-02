@@ -16,4 +16,5 @@ urlpatterns = patterns('',
     url(r'^homepage/add_comment$','grumblr.views.add_comment'),
     url(r'^picture/(?P<id>\d+)$', 'grumblr.views.get_picture', name='picture'),
     url(r'^follow/(?P<id>\d+)$','grumblr.views.follow', name='follow'),
+    url(r'^unfollow/(?P<id>\d+)$','grumblr.views.unfollow', name='unfollow'),
 )

@@ -9,10 +9,10 @@
 	
 	<link href="static/css/bootstrap.min.css" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="static/layout_css/homepage.css">
-
-
 	<link rel="shortcut icon" href="static/img/favicon.png">
-
+	<script type="text/javascript" src="static/js/jquery.min.js"></script>
+	<script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+	
 </head>
 
 <body>
@@ -54,21 +54,41 @@
 					<div class="col-md-9 column">
 						<div class="well well-lg">
 							
-
-							{% for post in posts %}
+							{% for following_content in following_contents %}
 							<div class="well well-lg">
 								<div class="row clearfix">
 									<div class="col-md-4 column">
-										<a a href="/user_stream_{{post.user.id}}"><img alt="140x140" src="static/images/default_header.png" class="img-thumbnail"></a>
-										<p class="lead">{{ post.user.get_username }}</p> 
+										<a a href="/user_stream_{{following_content.post.user.id}}">
+											{% if following_content.profile.id_picture %}
+											<img src="picture/{{following_content.profile.id}}" alt="140x140" class="img-thumbnail">
+											{% else %}
+											<img alt="140x140" src="static/images/default_header.png" class="img-thumbnail"><br>
+											{% endif %}
+										</a>
+										<p class="lead">{{ following_content.post.user.get_username }}</p> 
 									</div>
 									<div class="col-md-8 column">
-										<h2 class="media-heading">{{post.subject}} </h2><br>
-										<pre class="media-body">{{post.text}}</pre>
+										<h2 class="media-heading">{{following_content.post.subject}} </h2><br>
+										<pre class="media-body">{{following_content.post.text}}</pre>
 										<br>
 										<div class="btn-group">
-											<button class="btn btn-default" type="button">Like</button> <button class="btn btn-default" type="button">Unlike</button> <button class="btn btn-default" type="button"> Comment</button> <button class="btn btn-default" type="button"> Block User</button>
+											<button class="btn btn-default" type="button">Like</button> <button class="btn btn-default" type="button">Unlike</button> <button class="btn btn-default" data-toggle="collapse" data-target="#comment{{following_content.post.id}}" type="button"> Comment</button> <button class="btn btn-default" type="button"> Block User</button>
 										</div> <br>
+
+										<div id="comment{{following_content.post.id}}" class="collapse in">
+											<form action="/homepage/add_comment" method="post" accept-charset="utf-8">
+												<br>
+												<textarea class="form-control" rows=7 placeholder="Write your comment here!" name="comment"></textarea><br>
+												<button type="submit" class="btn btn-primary">Comment</button>
+												<input type="hidden" name="post_id"  value={{following_content.post.id}} >
+												<input type="hidden" name="user_id"  value={{user.id}} >
+												{% csrf_token %}
+											</form>
+											<br>
+											{% for comment in following_content.comments%}
+											<pre class="media-body">{{comment.user}}: {{comment.content}}</pre>
+											{% endfor %}
+										</div>
 										<div class="row clearfix">
 											<div class="col-md-12 column">
 												<br>
@@ -90,11 +110,18 @@
 							<h3>
 								Recommendations
 							</h3>
-							<a href="https://twitter.com/Xbox"><img alt="140x140" src="static/images/xbox_header.png" class="img-thumbnail"> </a><p class="lead">Xbox</p><button type="button" class="btn btn-primary">Follow</button>
+							{% for recommend in recommends%}
+							<a a href="/user_stream_{{recommend.recommend_user.id}}">
+								{% if recommend.recommend_profile.id_picture %}
+								<img src="picture/{{recommend.recommend_profile.id}}" alt="140x140" class="img-thumbnail">
+								{% else %}
+								<img alt="140x140" src="static/images/default_header.png" class="img-thumbnail"><br>
+								{% endif %}
+							</a>
+							<p class="lead">{{recommend.recommend_user}}</p><a href="{% url 'follow' recommend.recommend_user.id %}"><button type="button" class="btn btn-primary" }>Follow</button></a>
 							<br><br>
-							<a href="https://twitter.com/NASA"><img alt="140x140" src="static/images/nasa_header.jpg" class="img-thumbnail"> </a><p class="lead">NASA</p><button type="button" class="btn btn-primary">Follow</button>
-							<br><br>
-							<a href="https://twitter.com/BBCBreaking"><img alt="140x140" src="static/images/bbc_header.png" class="img-thumbnail"></a> <p class="lead">BBC Breaking News</p><button type="button" class="btn btn-primary">Follow</button>
+							{% endfor %}
+							
 						</div>
 					</div>
 				</div>

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
-
+from django.http import HttpResponseRedirect
 #Decorator to use built-in authentication system
 from django.contrib.auth.decorators import login_required
 
@@ -25,8 +25,31 @@ from grumblr.forms import *
 def homepage(request):
     posts = Post.objects.filter(user=request.user) 
     comments = Comment.objects.all()
+    tmp_profile_set = Profile.objects.filter(user = request.user)
+    if tmp_profile_set.count() == 0:
+        return redirect('/profile')
+    else:
+        pass
     profile = Profile.objects.get(user = request.user)
-    return render(request, 'grumblr/homepage.html', {'posts' : posts, 'comments' : comments, 'profile' : profile})
+    recommends = []
+    recommend_users = get_recommend_users(request)
+    for user in recommend_users:
+        recommend = {}
+        recommend['recommend_user'] = user
+        recommend['recommend_profile'] = Profile.objects.get(user = user)
+        recommends.append(recommend)
+    return render(request, 'grumblr/homepage.html', {'posts' : posts, 'comments' : comments, 'profile' : profile, 'recommends' : recommends})
+
+@login_required
+def get_recommend_users(request):
+    context = {}
+    follows = Follow.objects.filter(follower = request.user)
+    followings_id = []
+    followings_id.append(request.user.id)
+    for follow in follows:
+        followings_id.append(follow.following.id)
+    recommend_users = User.objects.all().exclude(id__in = followings_id)
+    return recommend_users
 
 @login_required
 def user_stream(request):
@@ -35,14 +58,41 @@ def user_stream(request):
     for follow in follows:
         tmp_posts = Post.objects.filter(user = follow.following)
         following_posts = list(chain(following_posts, tmp_posts))
-    return render(request, 'grumblr/user_stream.html', {'posts' : following_posts})
+    following_contents = []
+    for post in following_posts:
+        content = {}
+        content['profile'] = Profile.objects.get(user = post.user)
+        content['post'] = post
+        content['comments'] = Comment.objects.filter(post = post)
+        following_contents.append(content)
+    recommends = []
+    recommend_users = get_recommend_users(request)
+    for user in recommend_users:
+        recommend = {}
+        recommend['recommend_user'] = user
+        recommend['recommend_profile'] = Profile.objects.get(user = user)
+        recommends.append(recommend)
+    return render(request, 'grumblr/user_stream.html', {'following_contents' : following_contents, 'recommends': recommends})
 
 @login_required
 def specified_user_stream(request, id):
     tmp_user = User.objects.get(id=id)
     posts = Post.objects.filter(Q(user=tmp_user))
-    return render(request, 'grumblr/user_stream.html', {'posts' : posts})
-
+    following_contents = []
+    for post in posts:
+        content = {}
+        content['profile'] = Profile.objects.get(user = post.user)
+        content['post'] = post
+        content['comments'] = Comment.objects.filter(post = post)
+        following_contents.append(content)
+    recommends = []
+    recommend_users = get_recommend_users(request)
+    for user in recommend_users:
+        recommend = {}
+        recommend['recommend_user'] = user
+        recommend['recommend_profile'] = Profile.objects.get(user = user)
+        recommends.append(recommend)
+    return render(request, 'grumblr/user_stream.html', {'following_contents' : following_contents, 'recommends': recommends})
 
 def registration(request):
     context = {}
@@ -102,8 +152,7 @@ def add_comment(request):
     else:
         new_comment = Comment(content=request.POST['comment'], post=Post.objects.get(id = request.POST['post_id']), user=User.objects.get(id = request.POST['user_id']))
         new_comment.save()
-    return redirect('/homepage')
-
+    return HttpResponseRedirect('/')
 @login_required
 def delete_post(request, id):
     errors = []
@@ -127,7 +176,6 @@ def search_post(request):
     context = {'posts' : posts}
     return render(request, 'grumblr/search_result.html',context)
 
-@login_required
 def profile(request):
     context={}
     tmp_profile_set = Profile.objects.filter(user = request.user)
@@ -141,9 +189,8 @@ def profile(request):
     return render(request,'grumblr/profile.html',context)
 
 
-@login_required
 def get_picture(request, id):
-    profile = get_object_or_404(Profile, user=request.user, id=id)
+    profile = get_object_or_404(Profile, id=id)
     if not profile.id_picture:
         raise Http404
 
@@ -158,6 +205,12 @@ def follow(request, id):
     new_follow = Follow(follower=request.user, following = tmp_following)
     new_follow.save()
     return redirect('/homepage');
+
+@login_required
+def unfollow(request, id):
+   follow_to_delete = get_object_or_404(Follow, follower=request.user, following=User.objects.get(id=id)) 
+   follow_to_delete.delete()
+   return redirect('/user_stream')
 
 @login_required
 def edit_profile(request):
