@@ -16,6 +16,12 @@ from django.http import HttpResponse, Http404
 # Helper function to guess a MIME type from a file name
 from mimetypes import guess_type
 
+# Used to generate a one-time-use token to verify a user's email address
+from django.contrib.auth.tokens import default_token_generator
+
+# Used to send mail from within Django
+from django.core.mail import send_mail
+
 from itertools import chain
 from datetime import datetime
 
@@ -70,7 +76,7 @@ def user_stream(request):
     follows = Follow.objects.filter(follower = request.user)
     following_posts = []
     for follow in follows:
-        tmp_posts = Post.objects.filter(user = follow.following).order_by('-date')
+        tmp_posts = Post.objects.all().order_by('-date').filter(user = follow.following)
         following_posts = list(chain(following_posts, tmp_posts))
     following_contents = []
     for post in following_posts:
@@ -122,6 +128,8 @@ def specified_user_stream(request, id):
     specified_user['blocking'] = (BlockUser.objects.filter(blocking_user=request.user, blocked_user=tmp_user).count() > 0)
     return render(request, 'grumblr/user_stream.html', {'following_contents' : following_contents, 'recommends': recommends, 'specified_user': specified_user})
 
+
+@transaction.atomic
 def registration(request):
     context = {}
 
@@ -148,15 +156,46 @@ def registration(request):
 
     # Creates the new user from the valid form data
     new_user = User.objects.create_user(username=request.POST['username'], \
-                                        password=request.POST['password'])
-
+                                        password=request.POST['password'], email=request.POST['email'])
+    new_user.is_active = False
     new_user.save()
 
+     # Generate a one-time use token and an email message body
+    token = default_token_generator.make_token(new_user)
+
+    email_body = """
+Welcome to the Simple Address Book.  Please click the link below to
+verify your email address and complete the registration of your account:
+
+  http://%s%s
+""" % (request.get_host(),
+       reverse('confirm', args=(new_user.username, token)))
+
+    send_mail(subject="Verify your email address",
+              message= email_body,
+              from_email="haodongl@andrew.cmu.edu",
+              recipient_list=[new_user.email])
+
+    context['email'] = request.POST['email']
+
     # Logs in the new user and redirects to his/her todo list
-    new_user = authenticate(username=request.POST['username'], \
-                            password=request.POST['password'])
-    login(request, new_user)
-    return redirect('/homepage')
+   # new_user = authenticate(username=request.POST['username'], \
+    #                        password=request.POST['password'])
+   # login(request, new_user)
+    return render(request, 'grumblr/needs_confirmation.html', context)
+
+@transaction.atomic
+def confirm_registration(request, username, token):
+    user = get_object_or_404(User, username=username)
+
+    # Send 404 error if token is invalid
+    if not default_token_generator.check_token(user, token):
+        raise Http404
+
+    # Otherwise token was valid, activate the user.
+    user.is_active = True
+    user.save()
+    return render(request, 'grumblr/confirmed.html', {})
 
 @login_required
 def add_post(request):
@@ -252,7 +291,7 @@ def delete_dislike(request, id):
 def search_post(request):
     context={}
     keyword = request.POST.get('keyword',False)
-    posts = Post.objects.filter(Q(subject__icontains=keyword) | Q(text__icontains=keyword))
+    posts = Post.objects.filter(Q(subject__icontains=keyword) | Q(text__icontains=keyword)).order_by('-date')
     search_contents = []
     for post in posts:
         if BlockUser.objects.filter(blocked_user=request.user, blocking_user=post.user).count():
@@ -275,7 +314,8 @@ def search_post(request):
     context = {'following_contents' : search_contents, 'recommends': recommends}
     return render(request, 'grumblr/user_stream.html',context)
 
-def profile(request):
+@login_required
+def profile(request, id):
     context={}
     tmp_profile_set = Profile.objects.filter(user = request.user)
     if tmp_profile_set.count() == 0:
@@ -283,7 +323,10 @@ def profile(request):
         new_profile.save()
     else:
         pass
-    user_profile = Profile.objects.get(user = request.user)
+    showEditProfileButton = False
+    if User.objects.get(id=id) == request.user:
+        showEditProfileButton = True
+    user_profile = Profile.objects.get(user = User.objects.get(id=id))
     recommends = []
     recommend_users = get_recommend_users(request)
     for user in recommend_users:
@@ -291,7 +334,7 @@ def profile(request):
         recommend['recommend_user'] = user
         recommend['recommend_profile'] = Profile.objects.get(user = user)
         recommends.append(recommend)
-    context = {'profile' : user_profile, 'recommends': recommends}
+    context = {'profile' : user_profile, 'recommends': recommends,'showEditProfileButton': showEditProfileButton}
     return render(request,'grumblr/profile.html',context)
 
 

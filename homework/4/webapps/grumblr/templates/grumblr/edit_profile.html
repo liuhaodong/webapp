@@ -31,16 +31,16 @@
 						</form>
 						<ul class="nav navbar-nav navbar-right">
 							<li >
-								<a href="homepage">Homepage</a>
+								<a href="{% url 'homepage' %}">Homepage</a>
 							</li>
 							<li>
-								<a href="user_stream">Following</a>
+								<a href="{% url 'user_stream' %}">Following</a>
 							</li>
 							<li class="active">
-								<a href="profile">My Profile</a>
+								<a href="{% url 'profile' user.id%}">My Profile</a>
 							</li>
 							<li>
-								<a href="/logout"><i class="glyphicon glyphicon glyphicon-off"></i></a>
+								<a href="{% url 'logout' %}"><i class="glyphicon glyphicon glyphicon-off"></i></a>
 							</li>
 						</ul>
 
@@ -49,7 +49,7 @@
 				</nav>
 				<div class="row clearfix">
 					<div class="col-md-9 column">
-						<form enctype="multipart/form-data" action = "edit_profile" method="post">
+						<form enctype="multipart/form-data" action = "{% url 'edit_profile' %}" method="post">
 							{% csrf_token %}
 							<div class="well well-lg">
 								<div class="well well-lg">
@@ -128,17 +128,16 @@
 								Recommendations
 							</h3>
 							{% for recommend in recommends%}
-							<a a href="/user_stream_{{recommend.recommend_user.id}}">
+							<a a href="{% url 'specified_user_stream' recommend.recommend_user.id%}">
 								{% if recommend.recommend_profile.id_picture %}
-								<img src="picture/{{recommend.recommend_profile.id}}" alt="140x140" class="img-thumbnail">
+								<img src="{% url 'picture' recommend.recommend_profile.id%}" alt="140x140" class="img-thumbnail">
 								{% else %}
 								<img alt="140x140" src="static/images/default_header.png" class="img-thumbnail"><br>
 								{% endif %}
 							</a>
 							<p class="lead">{{recommend.recommend_user}}</p><a href="{% url 'follow' recommend.recommend_user.id %}"><button type="button" class="btn btn-primary" }>Follow</button></a>
 							<br><br>
-							{% endfor %}
-						</div>					
+							{% endfor %}						</div>					
 					</div>
 				</div>
 			</div>
