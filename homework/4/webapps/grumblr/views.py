@@ -265,7 +265,7 @@ def unblock_user(request, id):
         block_to_delete.delete()
     except ObjectDoesNotExist:
         errors.append('The block did not exist')
-    return redirect('/homepage')
+    return redirect('/user_stream_'+str(id))
 
 @login_required
 def dislike_post(request, id):
