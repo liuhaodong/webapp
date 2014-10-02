@@ -13,6 +13,7 @@ How to Use:<br>
 2. visit localhost:8000<br>
 
 Note: After registration, the confirmation email will be printed on console. Copy and visit the printed confirmation link to activate your account.<br>
+Note: When you follow a user, his/her posts will be displayed by clicking 'Following' tab in the navi-bar.<br>
 Note: You can't follow yourself, because you can see your post in your homepage<br>
 Note: Click 'Like' button to remove your Dislike on a post<br>
 Note: Clike 'Comment' button to fold/unfold comment section<br>
