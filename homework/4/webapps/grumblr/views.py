@@ -61,6 +61,12 @@ def user_stream(request):
     following_contents = []
     for post in following_posts:
         content = {}
+        content['dislike'] = False
+        if DislikeGrumbl.objects.filter(user=request.user, post=post).count()>0:
+            content['dislike'] = True
+            print(request.user)
+            print(post.id)
+            print(DislikeGrumbl.objects.filter(user=request.user, post=post).count)
         content['profile'] = Profile.objects.get(user = post.user)
         content['post'] = post
         content['comments'] = Comment.objects.filter(post = post)
@@ -152,7 +158,8 @@ def add_comment(request):
     else:
         new_comment = Comment(content=request.POST['comment'], post=Post.objects.get(id = request.POST['post_id']), user=User.objects.get(id = request.POST['user_id']))
         new_comment.save()
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect('/homepage')
+
 @login_required
 def delete_post(request, id):
     errors = []
@@ -167,6 +174,15 @@ def delete_post(request, id):
     context = {'posts' : posts, 'errors' : errors}
     return redirect('/homepage')
 
+@login_required
+def dislike_post(request, id):
+    tmp_dislike_set = DislikeGrumbl.objects.filter(user = request.user, post = Post.objects.get(id=id))
+    if tmp_dislike_set.count() == 0:
+        new_dislike = DislikeGrumbl(user = request.user, post = Post.objects.get(id=id))
+        new_dislike.save()
+    else:
+        pass
+    return redirect('/homepage')
 
 def search_post(request):
     context={}
