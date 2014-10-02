@@ -126,15 +126,22 @@
 							<h3>
 								Recommendations
 							</h3>
-							<a href="https://twitter.com/Xbox"><img alt="140x140" src="/static/images/xbox_header.png" class="img-thumbnail"> </a><p class="lead">Xbox</p><button type="button" class="btn btn-primary">Follow</button>
+							{% for recommend in recommends%}
+							<a a href="/user_stream_{{recommend.recommend_user.id}}">
+								{% if recommend.recommend_profile.id_picture %}
+								<img src="picture/{{recommend.recommend_profile.id}}" alt="140x140" class="img-thumbnail">
+								{% else %}
+								<img alt="140x140" src="static/images/default_header.png" class="img-thumbnail"><br>
+								{% endif %}
+							</a>
+							<p class="lead">{{recommend.recommend_user}}</p><a href="{% url 'follow' recommend.recommend_user.id %}"><button type="button" class="btn btn-primary" }>Follow</button></a>
 							<br><br>
-							<a href="https://twitter.com/NASA"><img alt="140x140" src="/static/images/nasa_header.jpg" class="img-thumbnail"> </a><p class="lead">NASA</p><button type="button" class="btn btn-primary">Follow</button>
-							<br><br>
-							<a href="https://twitter.com/BBCBreaking"><img alt="140x140" src="/static/images/bbc_header.png" class="img-thumbnail"></a> <p class="lead">BBC Breaking News</p><button type="button" class="btn btn-primary">Follow</button>
-						</div>					</div>
+							{% endfor %}
+						</div>					
 					</div>
 				</div>
 			</div>
 		</div>
-	</body>
-	</html>
+	</div>
+</body>
+</html>

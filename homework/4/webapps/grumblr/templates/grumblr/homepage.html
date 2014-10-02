@@ -99,7 +99,7 @@
 										<pre class="media-body">{{content.post.text}}</pre>
 										<br>
 										<div class="btn-group">
-											<button class="btn btn-default" type="button">Like</button> <a href="dislike/{{content.post.id}}"><button class="btn btn-default" type="button">Dislike</button></a> <button class="btn btn-default" data-toggle="collapse" data-target="#comment{{content.post.id}}" type="button"> Comment</button> <button class="btn btn-default" type="button"> Block User</button>
+											<a href="delete_dislike/{{content.post.id}}"><button class="btn btn-default" type="button">Like</button></a> <a href="dislike/{{content.post.id}}"><button class="btn btn-default" type="button">Dislike</button></a> <button class="btn btn-default" data-toggle="collapse" data-target="#comment{{content.post.id}}" type="button"> Comment</button> 
 										</div> <br>
 
 										<div id="comment{{content.post.id}}" class="collapse in">
@@ -112,9 +112,11 @@
 												{% csrf_token %}
 											</form>
 											<br>
+											<div class="well">
 											{% for comment in content.comments %}
 											<pre class="media-body">{{comment.user}}: {{comment.content}} {% if comment.user = user %} <a href="{% url 'delete_comment' comment.id %}"><i class="glyphicon glyphicon glyphicon-remove"></i></a>{% endif%}</pre>
 											{% endfor %}
+											</div>
 										</div>
 										<div class="row clearfix">
 											<div class="col-md-12 column">

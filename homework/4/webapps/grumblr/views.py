@@ -24,6 +24,8 @@ from grumblr.forms import *
 
 @login_required
 def homepage(request):
+    tmp_following = Follow.objects.filter(following=request.user, follower=request.user)
+    tmp_following.delete()
     posts = Post.objects.filter(user=request.user).order_by('-date')
     comments = Comment.objects.all()
     tmp_profile_set = Profile.objects.filter(user = request.user)
@@ -236,13 +238,42 @@ def dislike_post(request, id):
         pass
     return redirect('/homepage')
 
+@login_required
+def delete_dislike(request, id):
+    errors = []
+    try:
+        block_to_delete = DislikeGrumbl.objects.get(user=request.user, post = Post.objects.get(id=id))
+        block_to_delete.delete()
+    except ObjectDoesNotExist:
+        errors.append('The dislike did not exist')
+    return redirect('/homepage')
+
+@login_required
 def search_post(request):
     context={}
     keyword = request.POST.get('keyword',False)
-    print(keyword)
     posts = Post.objects.filter(Q(subject__icontains=keyword) | Q(text__icontains=keyword))
-    context = {'posts' : posts}
-    return render(request, 'grumblr/search_result.html',context)
+    search_contents = []
+    for post in posts:
+        if BlockUser.objects.filter(blocked_user=request.user, blocking_user=post.user).count():
+            continue
+        content = {}
+        content['dislike'] = False
+        if DislikeGrumbl.objects.filter(user=request.user, post=post).count()>0:
+            content['dislike'] = True
+        content['profile'] = Profile.objects.get(user = post.user)
+        content['post'] = post
+        content['comments'] = Comment.objects.filter(post = post)
+        search_contents.append(content)
+    recommends = []
+    recommend_users = get_recommend_users(request)
+    for user in recommend_users:
+        recommend = {}
+        recommend['recommend_user'] = user
+        recommend['recommend_profile'] = Profile.objects.get(user = user)
+        recommends.append(recommend)
+    context = {'following_contents' : search_contents, 'recommends': recommends}
+    return render(request, 'grumblr/user_stream.html',context)
 
 def profile(request):
     context={}
@@ -253,7 +284,14 @@ def profile(request):
     else:
         pass
     user_profile = Profile.objects.get(user = request.user)
-    context = {'profile' : user_profile}
+    recommends = []
+    recommend_users = get_recommend_users(request)
+    for user in recommend_users:
+        recommend = {}
+        recommend['recommend_user'] = user
+        recommend['recommend_profile'] = Profile.objects.get(user = user)
+        recommends.append(recommend)
+    context = {'profile' : user_profile, 'recommends': recommends}
     return render(request,'grumblr/profile.html',context)
 
 
@@ -283,7 +321,15 @@ def unfollow(request, id):
 @login_required
 def edit_profile(request):
     context = {}
+    recommends = []
+    recommend_users = get_recommend_users(request)
+    for user in recommend_users:
+        recommend = {}
+        recommend['recommend_user'] = user
+        recommend['recommend_profile'] = Profile.objects.get(user = user)
+        recommends.append(recommend)
     if request.method == 'GET':
+        context['recommends'] = recommends
         return render(request,'grumblr/edit_profile.html',context)
     else:
         tmp_profile_set = Profile.objects.filter(user = request.user)
@@ -310,9 +356,8 @@ def edit_profile(request):
         if 'language' in request.POST and request.POST['language']:
             user_profile.language = request.POST['language']
         if 'id_picture' in request.FILES and request.FILES['id_picture']:
-            print("pic inside")
             user_profile.id_picture = request.FILES['id_picture']
-        print("after")
 	user_profile.save()
-        context = {'profile' : user_profile}
+    
+    context = {'profile' : user_profile,'recommends' : recommends}
     return render(request,'grumblr/profile.html',context)
