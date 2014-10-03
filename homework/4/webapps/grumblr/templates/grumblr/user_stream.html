@@ -91,9 +91,9 @@
 											</form>
 											<br>
 											<div class="well">
-											{% for comment in following_content.comments%}
-											<pre class="media-body">{{comment.user}}: {{comment.content}} {% if comment.user = user %} <a href="{% url 'delete_comment' comment.id %}"><i class="glyphicon glyphicon glyphicon-remove"></i></a>{% endif%}</pre>
-											{% endfor %}
+												{% for comment in following_content.comments%}
+												<pre class="media-body">{{comment.user}}: {{comment.content}} {% if comment.user = user %} <a href="{% url 'delete_comment' comment.id %}"><i class="glyphicon glyphicon glyphicon-remove"></i></a>{% endif%}</pre>
+												{% endfor %}
 											</div>
 										</div>
 										<div class="row clearfix">
@@ -118,11 +118,11 @@
 							<div class="well">
 								<p class="lead">{{specified_user.user}}'s Home</p>
 								<div class="btn-group">
-								{% if specified_user.following %}<a href="{% url 'unfollow' specified_user.user.id %}"><button class="btn btn-primary" type="button">Unfollow</button></a>{% else %}<a href="{% url 'follow' specified_user.user.id %}"><button class="btn btn-primary" type="button">Follow</button></a>{% endif %}
+									{% if specified_user.following %}<a href="{% url 'unfollow' specified_user.user.id %}"><button class="btn btn-primary" type="button">Unfollow</button></a>{% else %}<a href="{% url 'follow' specified_user.user.id %}"><button class="btn btn-primary" type="button">Follow</button></a>{% endif %}
 
-								{% if specified_user.blocking %}<a href="{% url 'unblock_user' specified_user.user.id %}"><button class="btn btn-primary" type="button">Unblock</button></a>{% else %}<a href="{% url 'block_user' specified_user.user.id %}"><button class="btn btn-primary" type="button">Block</button></a>{% endif %}
+									{% if specified_user.blocking %}<a href="{% url 'unblock_user' specified_user.user.id %}"><button class="btn btn-primary" type="button">Unblock</button></a>{% else %}<a href="{% url 'block_user' specified_user.user.id %}"><button class="btn btn-primary" type="button">Block</button></a>{% endif %}
 
-								<a href="{% url 'profile' specified_user.user.id%}"><i class="glyphicon glyphicon-user"></i></a>
+									<a href="{% url 'profile' specified_user.user.id%}"><i class="glyphicon glyphicon-user"></i></a>
 								</div>
 							</div>
 							{% endif %}

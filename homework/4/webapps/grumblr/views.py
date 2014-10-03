@@ -36,7 +36,7 @@ def homepage(request):
     comments = Comment.objects.all()
     tmp_profile_set = Profile.objects.filter(user = request.user)
     if tmp_profile_set.count() == 0:
-        return redirect('/profile')
+        return redirect('profile', id=request.user.id )
     else:
         pass
     profile = Profile.objects.get(user = request.user)
