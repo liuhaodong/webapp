@@ -78,16 +78,15 @@
 										<pre class="media-body">{{following_content.post.text}}</pre>
 										<br>
 										<div class="btn-group">
-											<a href="delete_dislike/{{following_content.post.id}}"><button class="btn btn-default" type="button">Like</button></a> <a href="dislike/{{following_content.post.id}}"><button class="btn btn-default" type="button">Dislike</button></a> <button class="btn btn-default" data-toggle="collapse" data-target="#comment{{following_content.post.id}}" type="button"> Comment</button> 
+											<a href="{% url 'delete_dislike' following_content.post.id %}"><button class="btn btn-default" type="button">Like</button></a> <a href="{% url 'dislike' following_content.post.id%}"><button class="btn btn-default" type="button">Dislike</button></a> <button class="btn btn-default" data-toggle="collapse" data-target="#comment{{following_content.post.id}}" type="button"> Comment</button> 
 										</div> <br>
 
 										<div id="comment{{following_content.post.id}}" class="collapse in">
-											<form action="/homepage/add_comment" method="post" accept-charset="utf-8">
+											<form action="{% url 'add_comment' %}" method="post" accept-charset="utf-8">
 												<br>
 												<textarea class="form-control" rows=7 placeholder="Write your comment here!" name="comment"></textarea><br>
 												<button type="submit" class="btn btn-primary">Comment</button>
 												<input type="hidden" name="post_id"  value={{following_content.post.id}} >
-												<input type="hidden" name="user_id"  value={{user.id}} >
 												{% csrf_token %}
 											</form>
 											<br>

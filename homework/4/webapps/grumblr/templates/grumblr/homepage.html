@@ -65,7 +65,7 @@
 										<p class="lead">{{ user.get_username }}</p>
 									</div>
 									<div class="col-md-8 column">
-										<form action="/homepage/add_post" method="post" accept-charset="utf-8">
+										<form action="{% url 'add_post' %}" method="post" accept-charset="utf-8">
 											<textarea class="form-control" rows=1 placeholder="Subject" name="subject"></textarea><br>
 											<textarea class="form-control" rows=7 placeholder="Write your post here!" name="post"></textarea> 
 											<br>
@@ -90,16 +90,16 @@
 										<p class="lead">{{ content.post.user.get_username }}</p> 
 									</div>
 									<div class="col-md-8 column">
-										<h2 class="media-heading">{{content.post.subject}} <a href="/homepage/delete_post/{{content.post.id}}"><i class="glyphicon glyphicon glyphicon-remove"></i></a></h2>
+										<h2 class="media-heading">{{content.post.subject}} <a href="{% url 'delete_post' content.post.id%}"><i class="glyphicon glyphicon glyphicon-remove"></i></a></h2>
 										<p>{{content.post.date}}</p>
 										{% if content.dislike %}
-									    <i class="glyphicon glyphicon-thumbs-down"></i><i>You Disliked This Post</i>
-									    {% endif %}
+										<i class="glyphicon glyphicon-thumbs-down"></i><i>You Disliked This Post</i>
+										{% endif %}
 										<br>
 										<pre class="media-body">{{content.post.text}}</pre>
 										<br>
 										<div class="btn-group">
-											<a href="delete_dislike/{{content.post.id}}"><button class="btn btn-default" type="button">Like</button></a> <a href="dislike/{{content.post.id}}"><button class="btn btn-default" type="button">Dislike</button></a> <button class="btn btn-default" data-toggle="collapse" data-target="#comment{{content.post.id}}" type="button"> Comment</button> 
+											<a href="{% url 'delete_dislike' content.post.id%}"><button class="btn btn-default" type="button">Like</button></a> <a href="dislike/{{content.post.id}}"><button class="btn btn-default" type="button">Dislike</button></a> <button class="btn btn-default" data-toggle="collapse" data-target="#comment{{content.post.id}}" type="button"> Comment</button> 
 										</div> <br>
 
 										<div id="comment{{content.post.id}}" class="collapse in">
@@ -113,9 +113,9 @@
 											</form>
 											<br>
 											<div class="well">
-											{% for comment in content.comments %}
-											<pre class="media-body">{{comment.user}}: {{comment.content}} {% if comment.user = user %} <a href="{% url 'delete_comment' comment.id %}"><i class="glyphicon glyphicon glyphicon-remove"></i></a>{% endif%}</pre>
-											{% endfor %}
+												{% for comment in content.comments %}
+												<pre class="media-body">{{comment.user}}: {{comment.content}} {% if comment.user = user %} <a href="{% url 'delete_comment' comment.id %}"><i class="glyphicon glyphicon glyphicon-remove"></i></a>{% endif%}</pre>
+												{% endfor %}
 											</div>
 										</div>
 										<div class="row clearfix">
