@@ -11,6 +11,7 @@ New Added Features:<br>
 How to Use:<br>
 1. python manage.py runserver<br>
 2. visit localhost:8000<br>
+3. Included test users are: haodongl, testuser1, testuser2,..., testuser6, password: testpassword<br>
 
 Note: After registration, the confirmation email will be printed on console. Copy and visit the printed confirmation link to activate your account.<br>
 Note: When you follow a user, his/her posts will be displayed by clicking 'Following' tab in the navi-bar. To view your following post, click the "Following" tab<br>
