@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Grumblr Homepage</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	
+	<link href="static/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="static/layout_css/homepage.css">
+	<link rel="shortcut icon" href="static/img/favicon.png">
+	<script type="text/javascript" src="static/js/jquery.min.js"></script>
+	<script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+	
+</head>
+
+<body>
+	<div class="container">
+		<div class="row clearfix">
+			<div class="col-md-12 column">
+				<nav class="navbar navbar-default" role="navigation">
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button> <a class="navbar-brand" href="{% url 'homepage' %}">Grumblr</a>
+					</div>
+
+					<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+						<form class="navbar-form navbar-right" role="search" method="post" action="{% url 'search_post' %}">
+							<div class="form-group">
+								<input type="text" class="form-control" placeholder="Search Grumblr" name="keyword">
+							</div> 
+							<button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+							{% csrf_token %}
+						</form>
+						<ul class="nav navbar-nav navbar-right">
+							<li >
+								<a href="{% url 'homepage' %}">Homepage</a>
+							</li>
+							<li class="active">
+								<a href="{% url 'user_stream' %}">Following</a>
+							</li>
+							<li>
+								<a href="{% url 'profile' user.id%}">My Profile</a>
+							</li>
+							<li>
+								<a href="{% url 'logout' %}"><i class="glyphicon glyphicon glyphicon-off"></i></a>
+							</li>
+						</ul>
+
+					</div>
+
+				</nav>
+				<div class="row clearfix">
+					<div class="col-md-9 column">
+						<div class="well well-lg">
+							
+							{% for following_content in following_contents %}
+							<div class="well well-lg">
+								<div class="row clearfix">
+									<div class="col-md-4 column">
+										<a a href="/user_stream_{{following_content.post.user.id}}">
+											{% if following_content.profile.id_picture %}
+											<img src="picture/{{following_content.profile.id}}" alt="140x140" class="img-thumbnail">
+											{% else %}
+											<img alt="140x140" src="static/images/default_header.png" class="img-thumbnail"><br>
+											{% endif %}
+										</a>
+										<p class="lead">{{ following_content.post.user.get_username }}</p> 
+									</div>
+									<div class="col-md-8 column">
+
+										<h2 class="media-heading">{{following_content.post.subject}} </h2>
+										<p>{{following_content.post.date}}</p>
+										{% if following_content.dislike %}
+										<i class="glyphicon glyphicon-thumbs-down"></i><i>You Disliked This Post</i>
+										{% endif %}
+										<br>
+										<pre class="media-body">{{following_content.post.text}}</pre>
+										<br>
+										<div class="btn-group">
+											<a href="{% url 'delete_dislike' following_content.post.id %}"><button class="btn btn-default" type="button">Like</button></a> <a href="{% url 'dislike' following_content.post.id%}"><button class="btn btn-default" type="button">Dislike</button></a> <button class="btn btn-default" data-toggle="collapse" data-target="#comment{{following_content.post.id}}" type="button"> Comment</button> 
+										</div> <br>
+
+										<div id="comment{{following_content.post.id}}" class="collapse in">
+											<form action="{% url 'add_comment' %}" method="post" accept-charset="utf-8">
+												<br>
+												<textarea class="form-control" rows=7 placeholder="Write your comment here!" name="comment"></textarea><br>
+												<button type="submit" class="btn btn-primary">Comment</button>
+												<input type="hidden" name="post_id"  value={{following_content.post.id}} >
+												{% csrf_token %}
+											</form>
+											<br>
+											<div class="well">
+												{% for comment in following_content.comments%}
+												<pre class="media-body">{{comment.user}}: {{comment.content}} {% if comment.user = user %} <a href="{% url 'delete_comment' comment.id %}"><i class="glyphicon glyphicon glyphicon-remove"></i></a>{% endif%}</pre>
+												{% endfor %}
+											</div>
+										</div>
+										<div class="row clearfix">
+											<div class="col-md-12 column">
+												<br>
+												
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							{% endfor %}
+
+
+						</div>
+
+					</div>
+					<div class="col-md-3 column">
+						<div class="well well-lg">
+							<p class="">Login As: {{user.get_username}}</p>
+							{% if specified_user %}
+							<div class="well">
+								<p class="lead">{{specified_user.user}}'s Home</p>
+								<div class="btn-group">
+									{% if specified_user.following %}<a href="{% url 'unfollow' specified_user.user.id %}"><button class="btn btn-primary" type="button">Unfollow</button></a>{% else %}<a href="{% url 'follow' specified_user.user.id %}"><button class="btn btn-primary" type="button">Follow</button></a>{% endif %}
+
+									{% if specified_user.blocking %}<a href="{% url 'unblock_user' specified_user.user.id %}"><button class="btn btn-primary" type="button">Unblock</button></a>{% else %}<a href="{% url 'block_user' specified_user.user.id %}"><button class="btn btn-primary" type="button">Block</button></a>{% endif %}
+
+									<a href="{% url 'profile' specified_user.user.id%}"><i class="glyphicon glyphicon-user"></i></a>
+								</div>
+							</div>
+							{% endif %}
+							<h3>
+								Recommendations
+							</h3>
+							{% for recommend in recommends%}
+							<a a href="{% url 'specified_user_stream' recommend.recommend_user.id%}">
+								{% if recommend.recommend_profile.id_picture %}
+								<img src="{% url 'picture' recommend.recommend_profile.id%}" alt="140x140" class="img-thumbnail">
+								{% else %}
+								<img alt="140x140" src="static/images/default_header.png" class="img-thumbnail"><br>
+								{% endif %}
+							</a>
+							<p class="lead">{{recommend.recommend_user}}</p><a href="{% url 'follow' recommend.recommend_user.id %}"><button type="button" class="btn btn-primary" }>Follow</button></a>
+							<br><br>
+							{% endfor %}
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
