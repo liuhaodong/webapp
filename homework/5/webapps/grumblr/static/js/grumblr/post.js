@@ -3,7 +3,10 @@ $(document).ready(function() {
     var $post_button = $("#post_button");
     var $post_subject = $("#post_subject");
     var $post_text = $("#post_text");
+    var $comment_button = $("button[data-id=comment_button]");
 
+
+    //This part sets up ajax setting to use csrf token. This part of code is from Django Document.
     function getCookie(name) {
         var cookieValue = null;
         if (document.cookie && document.cookie != '') {
@@ -50,6 +53,8 @@ $(document).ready(function() {
         }
     });
 
+
+    //Template html code for new post
     var postTemplate = ""+
     "<div class='well well-lg'>"+
     	"<div class='row clearfix'>"+
@@ -59,13 +64,32 @@ $(document).ready(function() {
     			"</a>"+
     			"<p class='lead'>{{post_user_name}}</p>"+
     		"</div>"+
-    		"<div class='col-md-8 column'>{{post_subject}}{{post_text}}</div>"+
+    		"<div class='col-md-8 column'>"+
+    			"<h2 class='media-heading'>{{post_subject}} <a href='delete_post/{{post_id}}'><i class='glyphicon glyphicon glyphicon-remove'></i></a></h2>"+
+    			"<p>{{post_date}}</p>"+
+    			"<br><pre class='media-body'>{{post_text}}</pre><br>"+
+    			"<div class='btn-group'><a href='delete_dislike/{{post_id}}'><button class='btn btn-default' type='button'>Like</button></a> <a href='dislike/{{post_id}}'><button class='btn btn-default' type='button'>Dislike</button></a> <button class='btn btn-default' data-toggle='collapse' data-target='#comment{{post_id}}' type='button'> Comment</button></div> <br>"+
+    			"<div id='comment{{post_id}}' class='collapse in'>"+
+    				"<form accept-charset='utf-8'>"+
+    					"<br><textarea class='form-control' rows=7 placeholder='Write your comment here!' name='comment' ></textarea><br>"+
+    					"<button type='button' class='btn btn-primary'>Comment</button>"+
+    					"<input type='hidden' name='post_id'  value={{post_id}} >"+
+    					""+
+    				"</form>"+
+    			"</div>"+
+    		"</div>"+
     	"</div>"+
     "</div>";
 
     function addPost(data){
-    	$('#content_part').append(Mustache.render(postTemplate, data));
-    }
+    	var output = Mustache.render(postTemplate, data);
+
+    	$(output).hide().insertAfter("#write_post").slideDown(300);
+    		
+    	//$("#content_part:first-child").after(output).fadeIn(1000);
+    		
+    	
+       };
 
     $post_button.click(function() {
 
@@ -93,5 +117,49 @@ $(document).ready(function() {
             });
 
     });
+
+    //Template html for new comment
+    var commentTemplate = ""+
+    "<pre class='media-body'>{{comment_user_name}}: {{comment_content}}"+
+    	"<a href='delete_comment/{{comment_id}}'><i class='glyphicon glyphicon glyphicon-remove'></i></a>"+
+    "</pre>"
+    ;
+
+    function addComment(data){
+    	var output = Mustache.render(commentTemplate, data);
+
+    	$(output).hide().insertAfter("#write_post").slideDown(300);
+    };
+
+    $comment_button.on('click', function(event) {
+
+    	var newComment = {
+    		post_id : $(this).siblings().filter($("input[name=post_id]")).val(),
+    		comment : $(this).siblings().filter($("textarea[name=comment]")).val(),
+    	};
+
+    	var currentButton = $(this)
+
+    	$.ajax({
+    		url: '/add_comment',
+    		type: 'POST',
+    		dataType: 'json',
+    		data: JSON.stringify(newComment),
+    	})
+    	.done(function(data) {
+    		var output = Mustache.render(commentTemplate, data);
+    		var comment_section = currentButton.parent().siblings().filter($("div[data-id=comment_part]"));
+    		$(output).hide().prependTo(comment_section).slideDown(300);
+    	})
+    	.fail(function() {
+    		console.log("error");
+    	})
+    	.always(function() {
+    		console.log("complete");
+    	});
+    	
+
+    });
+
 
 });

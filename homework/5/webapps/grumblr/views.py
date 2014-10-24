@@ -25,6 +25,7 @@ from django.core.mail import send_mail
 
 from itertools import chain
 from datetime import datetime
+from django.core.serializers.json import DjangoJSONEncoder
 
 from django.views.decorators.csrf import csrf_protect
 import json
@@ -231,6 +232,7 @@ def add_post(request):
             data['post_user_id'] = new_post.user.id
             data['profile_id'] = profile.id
             data['post_user_name'] = request.user.username
+            data['post_date'] = json.dumps(new_post.date, cls=DjangoJSONEncoder)
             return HttpResponse(json.dumps(data), content_type = "application/json")
     except KeyError:
         HttpResponseServerError("Malformed data!")
@@ -241,13 +243,23 @@ def add_post(request):
 def add_comment(request):
     errors = []
     data = {}
-    if not 'comment' in request.POST or not request.POST['comment']:
-        errors.append('Comment content cant be empty')
-    else:
-        new_comment = Comment(content=request.POST['comment'], post=Post.objects.get(
-            id=request.POST['post_id']), user=request.user)
-        new_comment.save()
-        data = serializers.serialize("json", new_comment)
+    if request.method == 'POST':
+        json_data = simplejson.loads(request.body)
+        print(json_data)
+    try:
+        if not 'comment' in json_data or not json_data['comment']:
+            errors.append('Comment content cant be empty')
+        else:
+            new_comment = Comment(content=json_data['comment'], post=Post.objects.get(id=json_data['post_id']), user=request.user)
+            new_comment.save()
+            data['post_id'] = new_comment.post.id
+            data['comment_content'] = new_comment.content
+            data['comment_id'] = new_comment.id
+            data['comment_user_name'] = request.user.username
+            data['comment_user_id'] = request.user.id
+            return HttpResponse(json.dumps(data), content_type = "application/json")
+    except KeyError:
+        HttpResponseServerError("Malformed data!") 
     return HttpResponse(data, content_type='application/json')
 
 

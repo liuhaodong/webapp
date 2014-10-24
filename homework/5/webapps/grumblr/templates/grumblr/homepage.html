@@ -104,16 +104,16 @@
 										</div> <br>
 
 										<div id="comment{{content.post.id}}" class="collapse in">
-											<form action="/homepage/add_comment" method="post" accept-charset="utf-8">
+											<form accept-charset="utf-8">
 												<br>
 												<textarea class="form-control" rows=7 placeholder="Write your comment here!" name="comment"></textarea><br>
-												<button type="submit" class="btn btn-primary">Comment</button>
+												<button type="button" class="btn btn-primary" data-id="comment_button">Comment</button>
 												<input type="hidden" name="post_id"  value={{content.post.id}} >
 												<input type="hidden" name="user_id"  value={{user.id}} >
 												{% csrf_token %}
 											</form>
 											<br>
-											<div class="well">
+											<div class="well" data-id="comment_part">
 												{% for comment in content.comments %}
 												<pre class="media-body">{{comment.user}}: {{comment.content}} {% if comment.user = user %} <a href="{% url 'delete_comment' comment.id %}"><i class="glyphicon glyphicon glyphicon-remove"></i></a>{% endif%}</pre>
 												{% endfor %}
