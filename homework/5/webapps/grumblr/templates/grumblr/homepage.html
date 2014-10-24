@@ -91,7 +91,7 @@
 										<p class="lead">{{ content.post.user.get_username }}</p> 
 									</div>
 									<div class="col-md-8 column">
-										<h2 class="media-heading">{{content.post.subject}} <a href="{% url 'delete_post' content.post.id%}"><i class="glyphicon glyphicon glyphicon-remove"></i></a></h2>
+										<h2 class="media-heading">{{content.post.subject}} <a ><i class="glyphicon glyphicon glyphicon-remove" name="delete_post" id={{content.post.id}}></i></a></h2>
 										<p>{{content.post.date}}</p>
 										{% if content.dislike %}
 										<i class="glyphicon glyphicon-thumbs-down"></i><i>You Disliked This Post</i>
@@ -115,7 +115,7 @@
 											<br>
 											<div class="well" data-id="comment_part">
 												{% for comment in content.comments %}
-												<pre class="media-body">{{comment.user}}: {{comment.content}} {% if comment.user = user %} <a href="{% url 'delete_comment' comment.id %}"><i class="glyphicon glyphicon glyphicon-remove"></i></a>{% endif%}</pre>
+												<pre class="media-body">{{comment.user}}: {{comment.content}} {% if comment.user = user %} <a><i class="glyphicon glyphicon glyphicon-remove" name="remove_comment" id={{comment.id}}></i></a>{% endif%}</pre>
 												{% endfor %}
 											</div>
 										</div>

@@ -1,9 +1,12 @@
 $(document).ready(function() {
 
+	var $content_part = $("#content_part");
     var $post_button = $("#post_button");
     var $post_subject = $("#post_subject");
     var $post_text = $("#post_text");
     var $comment_button = $("button[data-id=comment_button]");
+    var $remove_comment_button = $("i[name=remove_comment]");
+    var $comment_part = $("div[data-id=comment_part]");
 
 
     //This part sets up ajax setting to use csrf token. This part of code is from Django Document.
@@ -65,17 +68,19 @@ $(document).ready(function() {
     			"<p class='lead'>{{post_user_name}}</p>"+
     		"</div>"+
     		"<div class='col-md-8 column'>"+
-    			"<h2 class='media-heading'>{{post_subject}} <a href='delete_post/{{post_id}}'><i class='glyphicon glyphicon glyphicon-remove'></i></a></h2>"+
+    			"<h2 class='media-heading'>{{post_subject}} <a><i class='glyphicon glyphicon glyphicon-remove' name='delete_post' id={{post_id}}></i></a></h2>"+
     			"<p>{{post_date}}</p>"+
     			"<br><pre class='media-body'>{{post_text}}</pre><br>"+
     			"<div class='btn-group'><a href='delete_dislike/{{post_id}}'><button class='btn btn-default' type='button'>Like</button></a> <a href='dislike/{{post_id}}'><button class='btn btn-default' type='button'>Dislike</button></a> <button class='btn btn-default' data-toggle='collapse' data-target='#comment{{post_id}}' type='button'> Comment</button></div> <br>"+
     			"<div id='comment{{post_id}}' class='collapse in'>"+
     				"<form accept-charset='utf-8'>"+
     					"<br><textarea class='form-control' rows=7 placeholder='Write your comment here!' name='comment' ></textarea><br>"+
-    					"<button type='button' class='btn btn-primary'>Comment</button>"+
+    					"<button type='button' class='btn btn-primary' data-id='comment_button'>Comment</button>"+
     					"<input type='hidden' name='post_id'  value={{post_id}} >"+
     					""+
-    				"</form>"+
+    				"</form><br>"+
+    				"<div class='well' data-id='comment_part'>"+
+    				"</div>"+
     			"</div>"+
     		"</div>"+
     	"</div>"+
@@ -118,10 +123,31 @@ $(document).ready(function() {
 
     });
 
+    //Remove Post!
+    $content_part.on('click', 'i[name=delete_post]', function(event) {
+    	var post_to_delete = $(this).parent().parent().parent().parent().parent();
+    	var post_to_delete_id = $(this).attr('id');
+    	$.ajax({
+    		url: '/delete_post/'+post_to_delete_id,
+    		type: 'GET',
+    	})
+    	.done(function() {
+    		post_to_delete.slideUp(300, function(){post_to_delete.remove();})
+    	})
+    	.fail(function() {
+    		console.log("error");
+    	})
+    	.always(function() {
+    		console.log("complete");
+    	});
+    	
+    	/* Act on the event */
+    });
+
     //Template html for new comment
     var commentTemplate = ""+
     "<pre class='media-body'>{{comment_user_name}}: {{comment_content}}"+
-    	"<a href='delete_comment/{{comment_id}}'><i class='glyphicon glyphicon glyphicon-remove'></i></a>"+
+    	"<a><i class='glyphicon glyphicon glyphicon-remove' name='remove_comment' id={{comment_id}}></i></a>"+
     "</pre>"
     ;
 
@@ -131,14 +157,13 @@ $(document).ready(function() {
     	$(output).hide().insertAfter("#write_post").slideDown(300);
     };
 
-    $comment_button.on('click', function(event) {
-
+    $content_part.on('click', 'button[data-id=comment_button]', function(event) {
     	var newComment = {
     		post_id : $(this).siblings().filter($("input[name=post_id]")).val(),
     		comment : $(this).siblings().filter($("textarea[name=comment]")).val(),
     	};
 
-    	var currentButton = $(this)
+    	var currentButton = $(this);
 
     	$.ajax({
     		url: '/add_comment',
@@ -149,6 +174,8 @@ $(document).ready(function() {
     	.done(function(data) {
     		var output = Mustache.render(commentTemplate, data);
     		var comment_section = currentButton.parent().siblings().filter($("div[data-id=comment_part]"));
+    		console.log(comment_section);
+    		//$(output).prependTo($(this).parent());
     		$(output).hide().prependTo(comment_section).slideDown(300);
     	})
     	.fail(function() {
@@ -158,6 +185,28 @@ $(document).ready(function() {
     		console.log("complete");
     	});
     	
+
+    });
+
+
+    $content_part.on('click', 'i[name=remove_comment]', function(event) {
+
+    	var comment_to_delete = $(this).parent().parent();
+    	var comment_id = $(this).attr('id');
+
+    	$.ajax({
+    		url: '/delete_comment/'+comment_id,
+    		type: 'GET',
+    	})
+    	.done(function() {
+    		comment_to_delete.slideUp(300, function(){comment_to_delete.remove();})
+    	})
+    	.fail(function() {
+    		console.log("error");
+    	})
+    	.always(function() {
+    		console.log("complete");
+    	});
 
     });
 
