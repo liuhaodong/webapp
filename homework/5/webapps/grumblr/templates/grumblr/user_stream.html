@@ -12,6 +12,9 @@
 	<link rel="shortcut icon" href="static/img/favicon.png">
 	<script type="text/javascript" src="static/js/jquery.min.js"></script>
 	<script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="static/js/grumblr/post.js"></script>
+	<script type="text/javascript" src="static/js/grumblr/check_post.js"></script>
+	<script type="text/javascript" src="static/js/node_modules/mustache/mustache.js"></script>
 	
 </head>
 
@@ -50,12 +53,14 @@
 					</div>
 
 				</nav>
-				<div class="row clearfix">
+
+
+				<div class="row clearfix" id="whole_page">
 					<div class="col-md-9 column">
-						<div class="well well-lg">
+						<div class="well well-lg" id="content_part">
 							
 							{% for following_content in following_contents %}
-							<div class="well well-lg">
+							<div class="well well-lg" id={{following_content.post.id}}>
 								<div class="row clearfix">
 									<div class="col-md-4 column">
 										<a a href="/user_stream_{{following_content.post.user.id}}">
@@ -85,14 +90,14 @@
 											<form action="{% url 'add_comment' %}" method="post" accept-charset="utf-8">
 												<br>
 												<textarea class="form-control" rows=7 placeholder="Write your comment here!" name="comment"></textarea><br>
-												<button type="submit" class="btn btn-primary">Comment</button>
+												<button type="button" class="btn btn-primary" data-id="comment_button">Comment</button>
 												<input type="hidden" name="post_id"  value={{following_content.post.id}} >
 												{% csrf_token %}
 											</form>
 											<br>
-											<div class="well">
+											<div class="well" data-id="comment_part">
 												{% for comment in following_content.comments%}
-												<pre class="media-body">{{comment.user}}: {{comment.content}} {% if comment.user = user %} <a href="{% url 'delete_comment' comment.id %}"><i class="glyphicon glyphicon glyphicon-remove"></i></a>{% endif%}</pre>
+												<pre class="media-body">{{comment.user}}: {{comment.content}} {% if comment.user = user %} <a><i class="glyphicon glyphicon glyphicon-remove" name="remove_comment" id={{comment.id}}></i></a>{% endif%}</pre>
 												{% endfor %}
 											</div>
 										</div>

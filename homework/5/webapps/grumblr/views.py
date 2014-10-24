@@ -26,6 +26,7 @@ from django.core.mail import send_mail
 from itertools import chain
 from datetime import datetime
 from django.core.serializers.json import DjangoJSONEncoder
+from operator import itemgetter
 
 from django.views.decorators.csrf import csrf_protect
 import json
@@ -89,6 +90,7 @@ def user_stream(request):
         tmp_posts = Post.objects.all().order_by(
             '-date').filter(user=follow.following)
         following_posts = list(chain(following_posts, tmp_posts))
+    following_posts = sorted(following_posts, key=lambda post: post.id, reverse=True)
     following_contents = []
     for post in following_posts:
         if BlockUser.objects.filter(blocked_user=request.user, blocking_user=post.user).count():
@@ -419,6 +421,44 @@ def unfollow(request, id):
         Follow, follower=request.user, following=User.objects.get(id=id))
     follow_to_delete.delete()
     return redirect('/user_stream_' + str(id))
+
+@login_required
+def check_update(request, post_id):
+    follows = Follow.objects.filter(follower=request.user)
+    following_posts = []
+    for follow in follows:
+        tmp_posts = Post.objects.all().filter(user=follow.following, id__gt=post_id)
+        following_posts = list(chain(following_posts, tmp_posts))
+    following_posts = sorted(following_posts, key=lambda post: post.id, reverse=False)
+    following_contents = []
+    for post in following_posts:
+        if BlockUser.objects.filter(blocked_user=request.user, blocking_user=post.user).count():
+            continue
+        content = {}
+        comments = []
+        content['dislike'] = False
+        if DislikeGrumbl.objects.filter(user=request.user, post=post).count() > 0:
+            content['dislike'] = True
+
+        profile = Profile.objects.get(user=post.user)
+
+        content['post_id'] = post.id
+        content['post_subject'] = post.subject
+        content['post_text'] = post.text
+        content['post_user_id'] = post.user.id
+        content['profile_id'] = profile.id
+        content['post_user_name'] = post.user.username
+        tmp_comments = Comment.objects.filter(post=post)
+        for comment in tmp_comments:
+            tmp_comment = {}
+            tmp_comment['comment_id'] = comment.id
+            tmp_comment['comment_content'] = comment.content
+            tmp_comment['comment_user_name'] = comment.user.username
+            tmp_comment['comment_user_id'] = comment.user.id
+            comments.append(tmp_comment)
+        content['comments'] = comments
+        following_contents.append(content) 
+    return HttpResponse(json.dumps(following_contents), content_type = "application/json")
 
 
 @login_required

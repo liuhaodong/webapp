@@ -1,6 +1,7 @@
 $(document).ready(function() {
 
-	var $content_part = $("#content_part");
+    var $whole_page = $("#whole_page");
+    var $content_part = $("#content_part");
     var $post_button = $("#post_button");
     var $post_subject = $("#post_subject");
     var $post_text = $("#post_text");
@@ -8,6 +9,9 @@ $(document).ready(function() {
     var $remove_comment_button = $("i[name=remove_comment]");
     var $comment_part = $("div[data-id=comment_part]");
 
+    $whole_page.hide().fadeIn('slow', function() {
+        $whole_page.show();
+    });
 
     //This part sets up ajax setting to use csrf token. This part of code is from Django Document.
     function getCookie(name) {
@@ -58,50 +62,55 @@ $(document).ready(function() {
 
 
     //Template html code for new post
-    var postTemplate = ""+
-    "<div class='well well-lg'>"+
-    	"<div class='row clearfix'>"+
-    		"<div class='col-md-4 column'>"+
-    			"<a href='/user_stream_{{post_user_id}}'>"+
-					"<img src='picture/{{profile_id}}' alt='140x140' class='img-thumbnail'>"+
-    			"</a>"+
-    			"<p class='lead'>{{post_user_name}}</p>"+
-    		"</div>"+
-    		"<div class='col-md-8 column'>"+
-    			"<h2 class='media-heading'>{{post_subject}} <a><i class='glyphicon glyphicon glyphicon-remove' name='delete_post' id={{post_id}}></i></a></h2>"+
-    			"<p>{{post_date}}</p>"+
-    			"<br><pre class='media-body'>{{post_text}}</pre><br>"+
-    			"<div class='btn-group'><a href='delete_dislike/{{post_id}}'><button class='btn btn-default' type='button'>Like</button></a> <a href='dislike/{{post_id}}'><button class='btn btn-default' type='button'>Dislike</button></a> <button class='btn btn-default' data-toggle='collapse' data-target='#comment{{post_id}}' type='button'> Comment</button></div> <br>"+
-    			"<div id='comment{{post_id}}' class='collapse in'>"+
-    				"<form accept-charset='utf-8'>"+
-    					"<br><textarea class='form-control' rows=7 placeholder='Write your comment here!' name='comment' ></textarea><br>"+
-    					"<button type='button' class='btn btn-primary' data-id='comment_button'>Comment</button>"+
-    					"<input type='hidden' name='post_id'  value={{post_id}} >"+
-    					""+
-    				"</form><br>"+
-    				"<div class='well' data-id='comment_part'>"+
-    				"</div>"+
-    			"</div>"+
-    		"</div>"+
-    	"</div>"+
-    "</div>";
+    var postTemplate = "" +
+        "<div class='well well-lg' id={{post_id}}>" +
+        "<div class='row clearfix'>" +
+        "<div class='col-md-4 column'>" +
+        "<a href='/user_stream_{{post_user_id}}'>" +
+        "<img src='picture/{{profile_id}}' alt='140x140' class='img-thumbnail'>" +
+        "</a>" +
+        "<p class='lead'>{{post_user_name}}</p>" +
+        "</div>" +
+        "<div class='col-md-8 column'>" +
+        "<h2 class='media-heading'>{{post_subject}} <a><i class='glyphicon glyphicon glyphicon-remove' name='delete_post' id={{post_id}}></i></a></h2>" +
+        "<p>{{post_date}}</p>" +
+        "<br><pre class='media-body'>{{post_text}}</pre><br>" +
+        "<div class='btn-group'><a href='delete_dislike/{{post_id}}'><button class='btn btn-default' type='button'>Like</button></a> <a href='dislike/{{post_id}}'><button class='btn btn-default' type='button'>Dislike</button></a> <button class='btn btn-default' data-toggle='collapse' data-target='#comment{{post_id}}' type='button'> Comment</button></div> <br>" +
+        "<div id='comment{{post_id}}' class='collapse in'>" +
+        "<form accept-charset='utf-8'>" +
+        "<br><textarea class='form-control' rows=7 placeholder='Write your comment here!' name='comment' ></textarea><br>" +
+        "<button type='button' class='btn btn-primary' data-id='comment_button'>Comment</button>" +
+        "<input type='hidden' name='post_id'  value={{post_id}} >" +
+        "" +
+        "</form><br>" +
+        "<div class='well' data-id='comment_part'>" +
+        "</div>" +
+        "</div>" +
+        "</div>" +
+        "</div>" +
+        "</div>";
 
-    function addPost(data){
-    	var output = Mustache.render(postTemplate, data);
+    function addPost(data) {
+        var output = Mustache.render(postTemplate, data);
 
-    	$(output).hide().insertAfter("#write_post").slideDown(300);
-    		
-    	//$("#content_part:first-child").after(output).fadeIn(1000);
-    		
-    	
-       };
+        $(output).hide().insertAfter("#write_post").slideDown(300);
+
+        //$("#content_part:first-child").after(output).fadeIn(1000);
+
+
+    };
 
     $post_button.click(function() {
-
-        var newPost = {
-            subject: $post_subject.val(),
-            post: $post_text.val(),
-        };
+        var newPost = {}
+        if ($post_subject.val() == '' || $post_text.val() == '') {
+            window.alert("Subject/Content Must Not Be Empty");
+            return;
+        } else {
+            newPost = {
+                subject: $post_subject.val(),
+                post: $post_text.val(),
+            }
+        }
 
         $.ajax({
             url: '/add_post',
@@ -111,13 +120,13 @@ $(document).ready(function() {
         })
 
         .done(function(data) {
-        	addPost(data);
+            addPost(data);
         })
 
         .fail(function() {
                 console.log("error");
             })
-        .always(function() {
+            .always(function() {
                 console.log("complete");
             });
 
@@ -125,88 +134,91 @@ $(document).ready(function() {
 
     //Remove Post!
     $content_part.on('click', 'i[name=delete_post]', function(event) {
-    	var post_to_delete = $(this).parent().parent().parent().parent().parent();
-    	var post_to_delete_id = $(this).attr('id');
-    	$.ajax({
-    		url: '/delete_post/'+post_to_delete_id,
-    		type: 'GET',
-    	})
-    	.done(function() {
-    		post_to_delete.slideUp(300, function(){post_to_delete.remove();})
-    	})
-    	.fail(function() {
-    		console.log("error");
-    	})
-    	.always(function() {
-    		console.log("complete");
-    	});
-    	
-    	/* Act on the event */
+        var post_to_delete = $(this).parent().parent().parent().parent().parent();
+        var post_to_delete_id = $(this).attr('id');
+        $.ajax({
+                url: '/delete_post/' + post_to_delete_id,
+                type: 'GET',
+            })
+            .done(function() {
+                post_to_delete.slideUp(300, function() {
+                    post_to_delete.remove();
+                })
+            })
+            .fail(function() {
+                console.log("error");
+            })
+            .always(function() {
+                console.log("complete");
+            });
+
+        /* Act on the event */
     });
 
     //Template html for new comment
-    var commentTemplate = ""+
-    "<pre class='media-body'>{{comment_user_name}}: {{comment_content}}"+
-    	"<a><i class='glyphicon glyphicon glyphicon-remove' name='remove_comment' id={{comment_id}}></i></a>"+
-    "</pre>"
-    ;
+    var commentTemplate = "" +
+        "<pre class='media-body'>{{comment_user_name}}: {{comment_content}}" +
+        "<a><i class='glyphicon glyphicon glyphicon-remove' name='remove_comment' id={{comment_id}}></i></a>" +
+        "</pre>";
 
-    function addComment(data){
-    	var output = Mustache.render(commentTemplate, data);
+    function addComment(data) {
+        var output = Mustache.render(commentTemplate, data);
 
-    	$(output).hide().insertAfter("#write_post").slideDown(300);
+        $(output).hide().insertAfter("#write_post").slideDown(300);
     };
 
     $content_part.on('click', 'button[data-id=comment_button]', function(event) {
-    	var newComment = {
-    		post_id : $(this).siblings().filter($("input[name=post_id]")).val(),
-    		comment : $(this).siblings().filter($("textarea[name=comment]")).val(),
-    	};
+        var newComment = {
+            post_id: $(this).siblings().filter($("input[name=post_id]")).val(),
+            comment: $(this).siblings().filter($("textarea[name=comment]")).val(),
+        };
 
-    	var currentButton = $(this);
+        var currentButton = $(this);
 
-    	$.ajax({
-    		url: '/add_comment',
-    		type: 'POST',
-    		dataType: 'json',
-    		data: JSON.stringify(newComment),
-    	})
-    	.done(function(data) {
-    		var output = Mustache.render(commentTemplate, data);
-    		var comment_section = currentButton.parent().siblings().filter($("div[data-id=comment_part]"));
-    		console.log(comment_section);
-    		//$(output).prependTo($(this).parent());
-    		$(output).hide().prependTo(comment_section).slideDown(300);
-    	})
-    	.fail(function() {
-    		console.log("error");
-    	})
-    	.always(function() {
-    		console.log("complete");
-    	});
-    	
+        $.ajax({
+                url: '/add_comment',
+                type: 'POST',
+                dataType: 'json',
+                data: JSON.stringify(newComment),
+            })
+            .done(function(data) {
+                var output = Mustache.render(commentTemplate, data);
+                var comment_section = currentButton.parent().siblings().filter($("div[data-id=comment_part]"));
+                console.log(comment_section);
+                //$(output).prependTo($(this).parent());
+                $(output).hide().prependTo(comment_section).slideDown(300);
+            })
+            .fail(function() {
+                console.log("error");
+            })
+            .always(function() {
+                console.log("complete");
+            });
+
 
     });
 
 
     $content_part.on('click', 'i[name=remove_comment]', function(event) {
 
-    	var comment_to_delete = $(this).parent().parent();
-    	var comment_id = $(this).attr('id');
+        var comment_to_delete = $(this).parent().parent();
+        var comment_id = $(this).attr('id');
 
-    	$.ajax({
-    		url: '/delete_comment/'+comment_id,
-    		type: 'GET',
-    	})
-    	.done(function() {
-    		comment_to_delete.slideUp(300, function(){comment_to_delete.remove();})
-    	})
-    	.fail(function() {
-    		console.log("error");
-    	})
-    	.always(function() {
-    		console.log("complete");
-    	});
+        $.ajax({
+                url: '/delete_comment/' + comment_id,
+                type: 'GET',
+            })
+            .done(function() {
+                comment_to_delete.slideUp(300, function() {
+                    comment_to_delete.remove();
+                })
+            })
+            .fail(function() {
+                console.log("error");
+            })
+            .always(function() {
+                console.log("complete");
+            });
 
     });
 
