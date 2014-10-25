@@ -4,8 +4,8 @@ from datetime import datetime
 from django.contrib.auth.models import User
 
 class Post(models.Model):
-    text = models.CharField(max_length=256)
-    subject = models.CharField(max_length=256)
+    text = models.CharField(max_length=2048)
+    subject = models.CharField(max_length=512)
     user = models.ForeignKey(User)
     date = models.DateTimeField(default=datetime.now)
     def __unicode__(self):
