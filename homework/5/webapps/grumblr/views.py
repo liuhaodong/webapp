@@ -55,6 +55,8 @@ def homepage(request):
         content['dislike'] = False
         if DislikeGrumbl.objects.filter(user=request.user, post=post).count() > 0:
             content['dislike'] = True
+        if PostPic.objects.filter(post=post).count() > 0:
+            content['post_pic'] = True
         content['profile'] = Profile.objects.get(user=post.user)
         content['post'] = post
         content['comments'] = Comment.objects.filter(post=post)
@@ -99,6 +101,8 @@ def user_stream(request):
         content['dislike'] = False
         if DislikeGrumbl.objects.filter(user=request.user, post=post).count() > 0:
             content['dislike'] = True
+        if PostPic.objects.filter(post=post).count() > 0:
+            content['post_pic'] = True
         content['profile'] = Profile.objects.get(user=post.user)
         content['post'] = post
         content['comments'] = Comment.objects.filter(post=post)
@@ -125,6 +129,8 @@ def specified_user_stream(request, id):
         content['dislike'] = False
         if DislikeGrumbl.objects.filter(user=request.user, post=post).count() > 0:
             content['dislike'] = True
+        if PostPic.objects.filter(post=post).count() > 0:
+            content['post_pic'] = True
         content['profile'] = Profile.objects.get(user=post.user)
         content['post'] = post
         content['comments'] = Comment.objects.filter(post=post)
@@ -219,27 +225,27 @@ def confirm_registration(request, username, token):
 @csrf_protect
 def add_post(request):
     errors = []
-    data = {}
-    if request.method == 'POST':
-        json_data = simplejson.loads(request.body)
-    try:
-        if not 'post' in json_data or not json_data['post']:
-            errors.append('Post content cant be empty')
-        else:
-            new_post = Post(subject=json_data['subject'], text=json_data['post'], user=request.user)
-            new_post.save()
-            profile = Profile.objects.get(user=request.user)
-            data['post_id'] = new_post.id
-            data['post_subject'] = new_post.subject
-            data['post_text'] = new_post.text
-            data['post_user_id'] = new_post.user.id
-            data['profile_id'] = profile.id
-            data['post_user_name'] = request.user.username
-            data['post_date'] = json.dumps(new_post.date, cls=DjangoJSONEncoder)
-            return HttpResponse(json.dumps(data), content_type = "application/json")
-    except KeyError:
-        HttpResponseServerError("Malformed data!")
-    HttpResponse("Got json data")
+    if not 'post' in request.POST or not request.POST['post']:
+        errors.append('Post content cant be empty')
+    else:
+        new_post = Post(subject=request.POST['subject'], text=request.POST['post'], user=request.user)
+        new_post.save()
+        if 'post_picture' in request.FILES and request.FILES['post_picture']:
+                new_post_pic = PostPic(post=new_post, post_picture=request.FILES['post_picture'])
+                new_post_pic.save()
+
+    posts = Post.objects.filter(user=request.user)
+    context = {'posts' : posts, 'errors' : errors}
+    return redirect('/homepage')
+
+def get_post_picture(request, post_id):
+    post_pic = get_object_or_404(PostPic, post=Post.objects.get(id=post_id))
+
+    if not post_pic.post_picture:
+        raise Http404
+    content_type = guess_type(post_pic.post_picture.name)
+    print(content_type)
+    return HttpResponse(post_pic.post_picture, content_type=content_type)
 
 
 @login_required
@@ -440,7 +446,8 @@ def check_update(request, post_id):
         content['dislike'] = False
         if DislikeGrumbl.objects.filter(user=request.user, post=post).count() > 0:
             content['dislike'] = True
-
+        if PostPic.objects.filter(post=post).count() > 0:
+            content['post_pic'] = True
         profile = Profile.objects.get(user=post.user)
 
         content['post_id'] = post.id

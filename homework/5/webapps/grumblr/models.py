@@ -11,6 +11,12 @@ class Post(models.Model):
     def __unicode__(self):
         return self.text
 
+class PostPic(models.Model):
+    post = models.ForeignKey(Post)
+    post_picture = models.ImageField(upload_to="grumblr_post_photos", blank=True)
+    def __unicode__(self):
+        return self.id
+
 class Profile(models.Model):
     email = models.CharField(max_length=256)
     age   = models.CharField(max_length=3)

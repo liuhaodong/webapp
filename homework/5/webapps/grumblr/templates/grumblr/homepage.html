@@ -66,11 +66,12 @@
 										<p class="lead">{{ user.get_username }}</p>
 									</div>
 									<div class="col-md-8 column">
-										<form  accept-charset="utf-8">
+										<form enctype="multipart/form-data" action="{% url 'add_post' %}" method="post">
 											<textarea class="form-control" rows=1 placeholder="Subject" name="subject" id="post_subject"></textarea><br>
 											<textarea class="form-control" rows=7 placeholder="Write your post here!" name="post" id="post_text"></textarea> 
+											<input type="file" name="post_picture">
 											<br>
-											<button type="button" class="btn btn-primary" id="post_button">Post</button>
+											<button type="submit" class="btn btn-primary" id="post_button">Post</button>
 											{% csrf_token %}
 										</form>
 									</div>
@@ -98,6 +99,9 @@
 										{% endif %}
 										<br>
 										<pre class="media-body">{{content.post.text}}</pre>
+										{% if content.post_pic %}
+											<img src="post_picture/{{content.post.id}}" class="img-thumbnail">
+										{% endif %}
 										<br>
 										<div class="btn-group">
 											<a href="{% url 'delete_dislike' content.post.id%}"><button class="btn btn-default" type="button">Like</button></a> <a href="dislike/{{content.post.id}}"><button class="btn btn-default" type="button">Dislike</button></a> <button class="btn btn-default" data-toggle="collapse" data-target="#comment{{content.post.id}}" type="button"> Comment</button> 

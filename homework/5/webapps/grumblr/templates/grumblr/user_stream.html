@@ -81,6 +81,9 @@
 										{% endif %}
 										<br>
 										<pre class="media-body">{{following_content.post.text}}</pre>
+										{% if following_content.post_pic %}
+											<img src="post_picture/{{following_content.post.id}}" class="img-thumbnail">
+										{% endif %}
 										<br>
 										<div class="btn-group">
 											<a href="{% url 'delete_dislike' following_content.post.id %}"><button class="btn btn-default" type="button">Like</button></a> <a href="{% url 'dislike' following_content.post.id%}"><button class="btn btn-default" type="button">Dislike</button></a> <button class="btn btn-default" data-toggle="collapse" data-target="#comment{{following_content.post.id}}" type="button"> Comment</button> 
