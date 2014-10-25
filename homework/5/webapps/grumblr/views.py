@@ -116,7 +116,7 @@ def user_stream(request):
 @login_required
 def specified_user_stream(request, id):
     tmp_user = User.objects.get(id=id)
-    posts = Post.objects.filter(Q(user=tmp_user))
+    posts = Post.objects.filter(user=tmp_user)
     following_contents = []
     for post in posts:
         if BlockUser.objects.filter(blocked_user=request.user, blocking_user=post.user).count():
@@ -138,6 +138,7 @@ def specified_user_stream(request, id):
         recommends.append(recommend)
     specified_user = {}
     specified_user['user'] = tmp_user
+    specified_user['is_user_page'] = True
     specified_user['following'] = (
         Follow.objects.filter(follower=request.user, following=tmp_user).count() > 0)
     specified_user['blocking'] = (BlockUser.objects.filter(
@@ -504,3 +505,14 @@ def edit_profile(request):
 
     context = {'profile': user_profile, 'recommends': recommends}
     return render(request, 'grumblr/profile.html', context)
+
+
+def forgot_password(request):
+    if request.method == 'POST':
+        return password_reset(request, 
+            from_email=request.POST.get('email'))
+    else:
+        return render(request, 'grumblr/forgot_password.html')
+
+
+

@@ -13,7 +13,7 @@
 	<script type="text/javascript" src="static/js/jquery.min.js"></script>
 	<script type="text/javascript" src="static/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="static/js/grumblr/post.js"></script>
-	<script type="text/javascript" src="static/js/grumblr/check_post.js"></script>
+	
 	<script type="text/javascript" src="static/js/node_modules/mustache/mustache.js"></script>
 	
 </head>
@@ -39,7 +39,7 @@
 							<li >
 								<a href="{% url 'homepage' %}">Homepage</a>
 							</li>
-							<li class="active">
+							<li class="active" >
 								<a href="{% url 'user_stream' %}">Following</a>
 							</li>
 							<li>
@@ -120,6 +120,7 @@
 						<div class="well well-lg">
 							<p class="">Login As: {{user.get_username}}</p>
 							{% if specified_user %}
+							
 							<div class="well">
 								<p class="lead">{{specified_user.user}}'s Home</p>
 								<div class="btn-group">
@@ -130,6 +131,8 @@
 									<a href="{% url 'profile' specified_user.user.id%}"><i class="glyphicon glyphicon-user"></i></a>
 								</div>
 							</div>
+							{% else %}
+							<script type="text/javascript" src="static/js/grumblr/check_post.js"></script>
 							{% endif %}
 							<h3>
 								Recommendations
