@@ -352,7 +352,7 @@ def delete_dislike(request, id):
 @login_required
 def search_post(request):
     context = {}
-    keyword = request.POST.get('keyword', False)
+    keyword = request.GET.get('keyword', False)
     posts = Post.objects.filter(
         Q(subject__icontains=keyword) | Q(text__icontains=keyword)).order_by('-date')
     search_contents = []
