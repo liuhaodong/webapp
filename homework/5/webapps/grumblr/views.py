@@ -240,7 +240,6 @@ def add_post(request):
 
 def get_post_picture(request, post_id):
     post_pic = get_object_or_404(PostPic, post=Post.objects.get(id=post_id))
-
     if not post_pic.post_picture:
         raise Http404
     content_type = guess_type(post_pic.post_picture.name)
@@ -388,7 +387,7 @@ def profile(request, id):
     else:
         pass
     showEditProfileButton = False
-    if User.objects.get(id=id) == request.user:
+    if get_object_or_404(User, id=id) == request.user:
         showEditProfileButton = True
     user_profile = Profile.objects.get(user=User.objects.get(id=id))
     recommends = []
